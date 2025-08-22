@@ -137,9 +137,30 @@ html, body {
 
 body {
   font-family: 'Cinzel', serif;
-  background: linear-gradient(135deg, var(--wild-west-900) 0%, var(--wild-west-800) 25%, var(--wild-west-700) 50%, var(--wild-west-600) 75%, var(--wild-west-500) 100%);
   min-height: 100vh;
   position: relative;
+  background: url('https://wallpapercave.com/wp/wp4771641.jpg') center center/cover no-repeat fixed, linear-gradient(135deg, var(--wild-west-900) 0%, var(--wild-west-800) 25%, var(--wild-west-700) 50%, var(--wild-west-600) 75%, var(--wild-west-500) 100%);
+  transition: background-image 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+body.bg-animate {
+  animation: bg-fade 1.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+@keyframes bg-fade {
+  0% {
+    opacity: 0.5;
+    filter: blur(8px);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* Optional: alternate background class for second image */
+.bg-alt {
+  background: url('https://wallpapercave.com/wp/wp3770534.jpg') center center/cover no-repeat fixed, linear-gradient(135deg, var(--wild-west-900) 0%, var(--wild-west-800) 25%, var(--wild-west-700) 50%, var(--wild-west-600) 75%, var(--wild-west-500) 100%);
 }
 
 /* Western border styles */

@@ -68,7 +68,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining }) => {
   ));
 
   return (
-  <div className="min-h-screen relative bg-vignette bg-grid">
+    <div className="min-h-screen relative bg-vignette bg-grid">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-30">
         {dustParticles}
@@ -179,9 +179,10 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining }) => {
           </div>
         </motion.div>
 
-        {/* Bottom decorative elements */}
-        <motion.div
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+        {/* Bottom decorative elements with working scroll button */}
+        <motion.button
+          type="button"
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center focus:outline-none"
           animate={{
             y: [0, -10, 0],
           }}
@@ -190,31 +191,23 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining }) => {
             repeat: Infinity,
             repeatType: 'loop',
           }}
+          onClick={() => {
+            const nextSection = document.querySelector('#main-content-scroll-target');
+            if (nextSection) {
+              nextSection.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+          aria-label="Scroll to main content"
         >
           <div className="text-white/60 text-2xl">⬇</div>
           <p className="text-white/60 font-elegant text-sm mt-2">Scroll to Begin</p>
-        </motion.div>
+        </motion.button>
       </div>
+      {/* Scroll target for scroll button - place outside the main content for reliable scrolling */}
+      <div id="main-content-scroll-target" style={{ height: '10px' }} />
 
-      {/* Atmospheric sounds indicator */}
-      <motion.div
-        className="absolute top-4 right-4 text-white/70"
-        animate={{
-          opacity: [0.5, 1, 0.5],
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          repeatType: 'loop',
-        }}
-      >
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-elegant">🔊</span>
-          <span className="text-xs font-elegant">Desert Winds</span>
-        </div>
-      </motion.div>
     </div>
   );
-};
+}
 
 export default LandingPage;

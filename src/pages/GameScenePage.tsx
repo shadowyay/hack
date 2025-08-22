@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import '../assets/modernButton.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import GameCanvas from '../components/game/GameCanvas';
 import HUD from '../components/game/HUD';
@@ -141,7 +142,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-950 to-zinc-900 relative">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-950 to-zinc-900 relative overflow-y-auto">
       {/* Scenario Introduction Modal */}
       <Modal
         isOpen={showScenarioIntro}
@@ -200,7 +201,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
               variant="western"
               size="xl"
               onClick={handleStartGame}
-              className="text-xl px-8 py-4"
+              className="button-modern text-xl px-8 py-4"
             >
               🔫 BEGIN DUEL
             </Button>
@@ -225,7 +226,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
               variant="western"
               size="lg"
               onClick={togglePause}
-              className="w-full"
+              className="button-modern w-full"
             >
               ▶ Resume Game
             </Button>
@@ -234,7 +235,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
               variant="secondary"
               size="lg"
               onClick={handleQuitGame}
-              className="w-full"
+              className="button-modern w-full"
             >
               🚪 Quit to Menu
             </Button>
@@ -248,8 +249,8 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
         </div>
       </Modal>
 
-      {/* Game Canvas */}
-      <div className="relative w-full h-screen">
+  {/* Game Canvas */}
+  <div className="relative w-full" style={{ minHeight: '600px' }}>
         <AnimatePresence>
           {gameState.isPlaying && (
             <motion.div
@@ -282,7 +283,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
               variant="secondary"
               size="sm"
               onClick={togglePause}
-              className="bg-black/50 backdrop-blur-sm border border-white/20"
+              className="button-modern bg-black/50 backdrop-blur-sm border border-white/20"
             >
               ⏸ Pause
             </Button>
