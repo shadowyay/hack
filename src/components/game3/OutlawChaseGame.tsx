@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import Leaderboard from '../ui/Leaderboard';
 
 interface Enemy {
   id: number;
@@ -718,6 +719,16 @@ const OutlawChaseGame = () => {
             >
               🏠 Main Menu
             </button>
+          </div>
+
+          {/* Leaderboard */}
+          <div className="mt-12 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-br from-black/40 to-gray-900/40 border-2 border-red-600/50 rounded-lg backdrop-blur-sm p-8">
+              <h3 className="text-2xl font-bold text-red-300 mb-6 text-center">
+                🏆 Outlaw Chase Leaderboard
+              </h3>
+              <Leaderboard gameMode="chase" />
+            </div>
           </div>
 
           {/* Session Details */}
