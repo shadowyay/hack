@@ -13,7 +13,7 @@ start "Backend" cmd /k "cd src/backend && node app.js"
 timeout /t 2 /nobreak >nul
 
 echo 🤖 Starting AI Service...
-start "AI Service" cmd /k "conda activate tf && cd ai_service && python main.py"
+start "AI Service" cmd /k powershell -NoExit -Command "Set-Location 'C:\Users\SANJAY G\Desktop\hack'; .\venv\Scripts\Activate.ps1;cd ai_service; python main.py"
 
 echo.
 echo ✅ All servers starting in separate windows!
