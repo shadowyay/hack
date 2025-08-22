@@ -179,32 +179,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining }) => {
           </div>
         </motion.div>
 
-        {/* Bottom decorative elements with working scroll button */}
-        <motion.button
-          type="button"
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center focus:outline-none"
-          animate={{
-            y: [0, -10, 0],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: 'loop',
-          }}
-          onClick={() => {
-            const nextSection = document.querySelector('#main-content-scroll-target');
-            if (nextSection) {
-              nextSection.scrollIntoView({ behavior: 'smooth' });
-            }
-          }}
-          aria-label="Scroll to main content"
-        >
-          <div className="text-white/60 text-2xl">⬇</div>
-          <p className="text-white/60 font-elegant text-sm mt-2">Scroll to Begin</p>
-        </motion.button>
+  {/* ...removed scroll to begin button... */}
       </div>
-      {/* Scroll target for scroll button - place outside the main content for reliable scrolling */}
-      <div id="main-content-scroll-target" style={{ height: '10px' }} />
+  {/* ...removed scroll target... */}
 
     </div>
   );
