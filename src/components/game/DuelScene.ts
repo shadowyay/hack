@@ -8,7 +8,18 @@ export default class DuelScene extends Phaser.Scene {
 
   // Public helpers
   setGameEndCallback!: (r: Result) => void;
-  setDifficulty(_: 'easy' | 'medium' | 'hard') {}
+  setDifficulty(level: 'easy' | 'medium' | 'hard') {
+    const presets = {
+      easy: { approach: 120, retreat: 110, jump: 12, shoot: 40, bullet: 450, tick: 260 },
+      medium: { approach: 150, retreat: 130, jump: 18, shoot: 60, bullet: 500, tick: 200 },
+      hard: { approach: 190, retreat: 170, jump: 24, shoot: 75, bullet: 560, tick: 150 },
+    } as const;
+    this.aiConfig = presets[level];
+    if (this.aiTimer) {
+      this.aiTimer.remove(false);
+      this.aiTimer = this.time.addEvent({ delay: this.aiConfig.tick, loop: true, callback: this.aiLogic, callbackScope: this });
+    }
+  }
 
   // Private state
   private player!: Phaser.Physics.Arcade.Sprite;
@@ -34,6 +45,8 @@ export default class DuelScene extends Phaser.Scene {
   private streak = 0;
   private score = 0;
   private gameEnded = false;
+  private aiConfig = { approach: 150, retreat: 130, jump: 18, shoot: 60, bullet: 500, tick: 200 };
+  private aiTimer!: Phaser.Time.TimerEvent;
 
   // Ground level for consistent spawning
   private groundLevel!: number;
@@ -75,7 +88,9 @@ export default class DuelScene extends Phaser.Scene {
 
     // 2) Ground platform - physics enabled
     this.physics.world.setBounds(0, 0, width, height);
-    this.groundPlatform = this.add.rectangle(0, this.groundLevel, width, height - this.groundLevel, 0x704214).setOrigin(0);
+    // Position ground platform so its TOP surface is at groundLevel for characters to stand on
+    const groundThickness = height - this.groundLevel;
+    this.groundPlatform = this.add.rectangle(width/2, this.groundLevel + groundThickness/2, width, groundThickness, 0x704214);
     this.physics.add.existing(this.groundPlatform, true);
     (this.groundPlatform.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
     this.groundPlatform.setDepth(1);
@@ -109,8 +124,8 @@ export default class DuelScene extends Phaser.Scene {
     const playerSpawnX = MARGIN_X + halfW;
     const botSpawnX = width - (MARGIN_X + halfW);
     
-    // CRITICAL FIX: Both spawn at exactly the same Y coordinate
-    const spawnY = this.groundLevel - 30; // 30 pixels above ground for both
+    // Both spawn just above the ground surface to land on it properly
+    const spawnY = this.groundLevel - 30; // 30 pixels above ground surface for both
 
     this.player = this.physics.add.sprite(playerSpawnX, spawnY, 'pixel')
       .setDisplaySize(30, 60)
@@ -264,8 +279,15 @@ export default class DuelScene extends Phaser.Scene {
       if (!this.gameEnded) this.fireBullet();
     });
 
-    // 10) AI behavior - FIXED: More frequent updates for better synchronization
-    this.time.addEvent({ delay: 200, loop: true, callback: this.aiLogic, callbackScope: this });
+    // 10) AI behavior loop (tunable)
+    this.aiTimer = this.time.addEvent({ delay: this.aiConfig.tick, loop: true, callback: this.aiLogic, callbackScope: this });
+
+    // Allow external difficulty changes
+    window.addEventListener('DUEL_SET_DIFFICULTY', (ev: Event) => {
+      const ce = ev as CustomEvent;
+      const level = (ce.detail?.level ?? 'medium') as 'easy' | 'medium' | 'hard';
+      this.setDifficulty(level);
+    });
 
     // 11) Game instructions
     this.add.text(width / 2, 30, 'HIGH NOON DUEL', {
@@ -395,7 +417,7 @@ export default class DuelScene extends Phaser.Scene {
     bullet.setDisplaySize(12, 4).setTint(0xff0000); // Red bullet
     const body = bullet.body as Phaser.Physics.Arcade.Body;
     if (body) {
-      body.setVelocity(direction * 500, 0);
+      body.setVelocity(direction * this.aiConfig.bullet, 0);
       bullet.setCollideWorldBounds(true);
       body.onWorldBounds = true;
     }
@@ -420,25 +442,43 @@ export default class DuelScene extends Phaser.Scene {
     const distance = this.player.x - this.opponent.x;
     
     // FIXED: AI movement strategy - more responsive and grounded
+    let vx = 0;
     if (Math.abs(distance) > 300) {
       // Move closer
-      body.setVelocityX(Math.sign(distance) * 150);
+      vx = Math.sign(distance) * this.aiConfig.approach;
       this.opponent.setFlipX(distance < 0);
     } else if (Math.abs(distance) < 120) {
       // Move away for better shot
-      body.setVelocityX(-Math.sign(distance) * 120);
+      vx = -Math.sign(distance) * this.aiConfig.retreat;
       this.opponent.setFlipX(distance > 0);
     } else {
       // Stop and aim
-      body.setVelocityX(0);
+      vx = 0;
       this.opponent.setFlipX(distance < 0);
     }
+
+    // Obstacle avoidance: if blocked in intended direction, stop and optionally jump
+    if ((vx > 0 && (body.blocked.right || body.touching.right)) || (vx < 0 && (body.blocked.left || body.touching.left))) {
+      vx = 0;
+      if (body.blocked.down) {
+        // Small chance to hop over low cover when blocked
+        if (Phaser.Math.Between(0, 100) < Math.min(35, this.aiConfig.jump + 10)) {
+          body.setVelocityY(-400);
+          this.opponent.setScale(0.9, 1.3);
+          this.time.delayedCall(300, () => {
+            if (this.opponent) this.opponent.setScale(1, 1);
+          });
+        }
+      }
+    }
+
+    body.setVelocityX(vx);
     
     // FIXED: Jump logic - only jump when on ground and for good reason
-    const shouldJump = (
+  const shouldJump = (
       body.blocked.down && // Must be on ground
       (
-        Phaser.Math.Between(0, 100) < 20 || // Random evasion
+  Phaser.Math.Between(0, 100) < this.aiConfig.jump || // Random evasion
         (Math.abs(distance) < 200 && Math.abs(this.player.y - this.opponent.y) > 50) // Jump to reach player level
       )
     );
@@ -455,7 +495,7 @@ export default class DuelScene extends Phaser.Scene {
     const canShoot = (
       Math.abs(distance) < 500 && 
       Math.abs(this.player.y - this.opponent.y) < 100 && // Similar height
-      Phaser.Math.Between(0, 100) < 60 // 60% chance to shoot when in range
+  Phaser.Math.Between(0, 100) < this.aiConfig.shoot // chance to shoot when in range
     );
     
     if (canShoot) {

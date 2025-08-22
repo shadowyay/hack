@@ -6,16 +6,16 @@ import type { GameMode } from '../types';
 
 interface LeaderboardPageProps {
   onGoBack: () => void;
+  onPlayGame?: (mode: GameMode) => void;
 }
 
-const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ onGoBack }) => {
-  const [selectedMode, setSelectedMode] = useState<GameMode | null>(null);
+const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ onGoBack, onPlayGame }) => {
+  const [selectedMode, setSelectedMode] = useState<GameMode>('duel');
 
-  const modes: { mode: GameMode | null; label: string; icon: string }[] = [
-    { mode: null, label: 'Overall', icon: '🏆' },
-    { mode: 'duel', label: 'Duel', icon: '🤠' },
-    { mode: 'chase', label: 'Chase', icon: '🐎' },
-    { mode: 'tracking', label: 'Tracking', icon: '🎯' },
+  const modes: { mode: GameMode; label: string; icon: string; description: string }[] = [
+    { mode: 'duel', label: 'Duel Masters', icon: '🤠', description: 'Fast draw showdowns' },
+    { mode: 'chase', label: 'Chase Champions', icon: '🐎', description: 'High-speed pursuits' },
+    { mode: 'tracking', label: 'Tracking Legends', icon: '🎯', description: 'Precision tracking' },
   ];
 
   const userData = localStorage.getItem('user');
@@ -46,28 +46,29 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ onGoBack }) => {
             transition={{ delay: 0.4 }}
             className="font-elegant text-wild-west-200 text-xl"
           >
-            The fastest guns in the West
+            The fastest guns in the West - Choose your challenge
           </motion.p>
         </div>
 
         {/* Mode Selection Tabs */}
         <div className="flex justify-center mb-8">
-          <div className="glass p-2 rounded-xl">
-            <div className="flex gap-2">
+          <div className="glass p-3 rounded-xl">
+            <div className="flex gap-3">
               {modes.map((modeData) => (
                 <button
-                  key={modeData.label}
+                  key={modeData.mode}
                   onClick={() => setSelectedMode(modeData.mode)}
                   className={`
-                    px-6 py-3 rounded-lg font-elegant font-semibold transition-all duration-200
+                    px-6 py-4 rounded-lg font-elegant font-semibold transition-all duration-200 text-center min-w-[180px]
                     ${selectedMode === modeData.mode
-                      ? 'bg-wild-west-600 text-white shadow-lg'
-                      : 'text-wild-west-300 hover:text-white hover:bg-wild-west-700/50'
+                      ? 'bg-wild-west-600 text-white shadow-lg transform scale-105'
+                      : 'text-wild-west-300 hover:text-white hover:bg-wild-west-700/50 hover:transform hover:scale-102'
                     }
                   `}
                 >
-                  <span className="mr-2">{modeData.icon}</span>
-                  {modeData.label}
+                  <div className="text-2xl mb-1">{modeData.icon}</div>
+                  <div className="font-bold">{modeData.label}</div>
+                  <div className="text-xs opacity-80">{modeData.description}</div>
                 </button>
               ))}
             </div>
@@ -76,18 +77,32 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ onGoBack }) => {
 
         {/* Leaderboard */}
         <motion.div
-          key={selectedMode || 'overall'}
+          key={selectedMode}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
           <Leaderboard
-            gameMode={selectedMode || undefined}
+            gameMode={selectedMode}
             limit={20}
             showUserRank={!!user}
             userId={user?.id}
           />
+          
+          {/* Challenge Button */}
+          {onPlayGame && (
+            <div className="text-center mt-6">
+              <Button
+                onClick={() => onPlayGame(selectedMode)}
+                variant="western"
+                size="lg"
+                className="min-w-[240px]"
+              >
+                🎯 Challenge {modes.find(m => m.mode === selectedMode)?.label}
+              </Button>
+            </div>
+          )}
         </motion.div>
 
         {/* Back Button */}
@@ -110,11 +125,11 @@ const LeaderboardPage: React.FC<LeaderboardPageProps> = ({ onGoBack }) => {
             transition={{ delay: 0.6 }}
             className="mt-8 text-center"
           >
-            <div className="glass p-6 rounded-xl max-w-md mx-auto">
-              <h3 className="font-western text-xl text-wild-west-300 mb-4">
+            <div className="glass p-6 rounded-xl max-w-4xl mx-auto">
+              <h3 className="font-western text-xl text-wild-west-300 mb-6">
                 Your Legacy, {user.username}
               </h3>
-              <UserStats userId={user.id} />
+              <GameSpecificStats userId={user.id} selectedMode={selectedMode} />
             </div>
           </motion.div>
         )}
@@ -128,13 +143,19 @@ interface UserStatsData {
   bestScore: number;
   averageAccuracy: number;
   achievements: string[];
+  highScores: {
+    duel?: { score: number; accuracy: number; reactionTime: number; timestamp: Date };
+    chase?: { score: number; accuracy: number; reactionTime: number; timestamp: Date };
+    tracking?: { score: number; accuracy: number; reactionTime: number; timestamp: Date };
+  };
 }
 
-interface UserStatsProps {
+interface GameSpecificStatsProps {
   userId: string;
+  selectedMode: GameMode;
 }
 
-const UserStats: React.FC<UserStatsProps> = ({ userId }) => {
+const GameSpecificStats: React.FC<GameSpecificStatsProps> = ({ userId, selectedMode }) => {
   const [stats, setStats] = useState<UserStatsData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -162,6 +183,17 @@ const UserStats: React.FC<UserStatsProps> = ({ userId }) => {
     }
   };
 
+  const getGameModeInfo = (mode: GameMode) => {
+    switch (mode) {
+      case 'duel':
+        return { name: 'Duel Master', icon: '🤠', color: 'text-red-400' };
+      case 'chase':
+        return { name: 'Chase Champion', icon: '🐎', color: 'text-blue-400' };
+      case 'tracking':
+        return { name: 'Tracking Legend', icon: '🎯', color: 'text-green-400' };
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-4">
@@ -179,23 +211,78 @@ const UserStats: React.FC<UserStatsProps> = ({ userId }) => {
     );
   }
 
+  const currentGameStats = stats.highScores[selectedMode];
+  const gameInfo = getGameModeInfo(selectedMode);
+
   return (
-    <div className="grid grid-cols-2 gap-4 text-sm">
-      <div className="text-center">
-        <p className="text-wild-west-400">Total Games</p>
-        <p className="text-2xl font-bold text-wild-west-200">{stats.totalGames}</p>
+    <div className="space-y-6">
+      {/* Current Game Mode Stats */}
+      <div className="glass p-4 rounded-lg">
+        <h4 className={`font-western text-lg mb-4 ${gameInfo.color}`}>
+          {gameInfo.icon} {gameInfo.name} Performance
+        </h4>
+        {currentGameStats ? (
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="text-center">
+              <p className="text-wild-west-400">Best Score</p>
+              <p className="text-2xl font-bold text-wild-west-200">{currentGameStats.score?.toLocaleString()}</p>
+            </div>
+            <div className="text-center">
+              <p className="text-wild-west-400">Best Accuracy</p>
+              <p className="text-xl font-bold text-wild-west-200">{currentGameStats.accuracy?.toFixed(1)}%</p>
+            </div>
+            <div className="text-center">
+              <p className="text-wild-west-400">Best Reaction</p>
+              <p className="text-xl font-bold text-wild-west-200">{currentGameStats.reactionTime?.toFixed(0)}ms</p>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center text-wild-west-400 py-4">
+            <p>No {selectedMode} games played yet</p>
+            <p className="text-sm mt-2">Start playing to see your stats!</p>
+          </div>
+        )}
       </div>
-      <div className="text-center">
-        <p className="text-wild-west-400">Best Score</p>
-        <p className="text-2xl font-bold text-wild-west-200">{stats.bestScore?.toLocaleString()}</p>
+
+      {/* All Game Modes Overview */}
+      <div className="grid grid-cols-3 gap-4">
+        {(['duel', 'chase', 'tracking'] as GameMode[]).map((mode) => {
+          const modeStats = stats.highScores[mode];
+          const modeInfo = getGameModeInfo(mode);
+          
+          return (
+            <div 
+              key={mode}
+              className={`
+                glass p-3 rounded-lg text-center transition-all duration-200
+                ${mode === selectedMode ? 'ring-2 ring-wild-west-400' : 'hover:bg-wild-west-700/20'}
+              `}
+            >
+              <div className="text-lg mb-2">{modeInfo.icon}</div>
+              <div className="text-xs text-wild-west-400 mb-1">{mode.toUpperCase()}</div>
+              {modeStats ? (
+                <>
+                  <div className={`font-bold ${modeInfo.color}`}>{modeStats.score?.toLocaleString()}</div>
+                  <div className="text-xs text-wild-west-500">{modeStats.accuracy?.toFixed(1)}% acc</div>
+                </>
+              ) : (
+                <div className="text-xs text-wild-west-600">Not played</div>
+              )}
+            </div>
+          );
+        })}
       </div>
-      <div className="text-center">
-        <p className="text-wild-west-400">Avg Accuracy</p>
-        <p className="text-xl font-bold text-wild-west-200">{stats.averageAccuracy?.toFixed(1)}%</p>
-      </div>
-      <div className="text-center">
-        <p className="text-wild-west-400">Achievements</p>
-        <p className="text-xl font-bold text-wild-west-200">{stats.achievements?.length || 0}</p>
+
+      {/* Overall Stats */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="text-center">
+          <p className="text-wild-west-400">Total Games</p>
+          <p className="text-2xl font-bold text-wild-west-200">{stats.totalGames}</p>
+        </div>
+        <div className="text-center">
+          <p className="text-wild-west-400">Achievements</p>
+          <p className="text-2xl font-bold text-wild-west-200">{stats.achievements?.length || 0}</p>
+        </div>
       </div>
     </div>
   );

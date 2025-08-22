@@ -123,6 +123,8 @@ export interface ModalProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
+  hideClose?: boolean;
+  fullScreen?: boolean;
 }
 
 export interface TooltipProps {

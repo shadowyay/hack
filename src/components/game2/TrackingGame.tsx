@@ -74,6 +74,7 @@ interface GameState {
 
 const RDR2TrackingGame: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [canvasSize, setCanvasSize] = useState({ width: typeof window !== 'undefined' ? window.innerWidth : 1200, height: typeof window !== 'undefined' ? window.innerHeight : 800 });
   const gameLoopRef = useRef<number | null>(null);
   const keysRef = useRef<Record<string, boolean>>({});
   const mouseRef = useRef({ x: 0, y: 0, clicked: false });
@@ -109,6 +110,8 @@ const RDR2TrackingGame: React.FC = () => {
 
   // Utility functions
   const spawnAnimal = useCallback((): Animal => {
+    const W = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const H = typeof window !== 'undefined' ? window.innerHeight : 800;
     const animalTypes = [
       { name: 'Bear', size: 50, speed: 1, color: '#8B4513', points: 50, health: 3 },
       { name: 'Lion', size: 45, speed: 2, color: '#DAA520', points: 40, health: 2 },
@@ -121,8 +124,8 @@ const RDR2TrackingGame: React.FC = () => {
     return {
       ...type,
       id: Math.random().toString(36).substr(2, 9),
-      x: Math.random() * 1100 + 50,
-      y: Math.random() * 700 + 50,
+      x: Math.random() * (W - 100) + 50,
+      y: Math.random() * (H - 100) + 50,
       vx: (Math.random() - 0.5) * type.speed,
       vy: (Math.random() - 0.5) * type.speed,
       maxHealth: type.health,
@@ -278,10 +281,12 @@ const RDR2TrackingGame: React.FC = () => {
   }, []);
 
   const drawEnvironment = useCallback((ctx: CanvasRenderingContext2D) => {
+    const W = canvasRef.current?.width || 1200;
+    const H = canvasRef.current?.height || 800;
     // Trees
     for (let i = 0; i < 8; i++) {
-      const x = (i * 150) + 80;
-      const y = Math.sin(i * 0.8) * 50 + 150;
+      const x = ((i + 1) * (W / 9));
+      const y = Math.sin(i * 0.8) * 0.05 * H + 0.2 * H;
       
       // Trunk
       ctx.fillStyle = '#8B4513';
@@ -297,8 +302,8 @@ const RDR2TrackingGame: React.FC = () => {
     // Grass patches
     ctx.fillStyle = '#32CD32';
     for (let i = 0; i < 20; i++) {
-      const x = Math.random() * 1200;
-      const y = 800 - Math.random() * 100;
+      const x = Math.random() * W;
+      const y = H - Math.random() * 100;
       ctx.fillRect(x, y, 3, 8);
     }
   }, []);
@@ -363,6 +368,14 @@ const RDR2TrackingGame: React.FC = () => {
 
   // COMPLETE Game loop - RESTORED!
   const gameLoop = useCallback(() => {
+    // Stop the loop entirely when analysis is shown to avoid re-renders
+    if (gameState.showAnalysis) {
+      if (gameLoopRef.current) {
+        cancelAnimationFrame(gameLoopRef.current);
+        gameLoopRef.current = null;
+      }
+      return;
+    }
     const canvas = canvasRef.current;
     if (!canvas) return;
     
@@ -386,9 +399,11 @@ const RDR2TrackingGame: React.FC = () => {
         newState.player.direction = 1;
       }
       
-      // Boundary check for player
-      newState.player.x = Math.max(20, Math.min(1180, newState.player.x));
-      newState.player.y = Math.max(20, Math.min(780, newState.player.y));
+  // Boundary check for player
+  const W = canvasRef.current?.width || 1200;
+  const H = canvasRef.current?.height || 800;
+  newState.player.x = Math.max(20, Math.min(W - 20, newState.player.x));
+  newState.player.y = Math.max(20, Math.min(H - 20, newState.player.y));
       
       // Eagle Eye - RESTORED!
       if (keysRef.current['e'] && newState.eagleEyeCooldown <= 0) {
@@ -410,7 +425,7 @@ const RDR2TrackingGame: React.FC = () => {
       const newTracks = [...newState.tracks];
       const newParticles = [...newState.particles];
       
-      newState.animals = newState.animals.map(animal => {
+  newState.animals = newState.animals.map(animal => {
         const updatedAnimal = { ...animal };
         updatedAnimal.behaviorTimer++;
         
@@ -426,16 +441,16 @@ const RDR2TrackingGame: React.FC = () => {
         updatedAnimal.y += updatedAnimal.vy * moveSpeed;
         
         // Boundary check
-        if (updatedAnimal.x < 50 || updatedAnimal.x > 1150) {
+  if (updatedAnimal.x < 50 || updatedAnimal.x > (W - 50)) {
           updatedAnimal.vx *= -1;
           updatedAnimal.direction *= -1;
         }
-        if (updatedAnimal.y < 50 || updatedAnimal.y > 750) {
+  if (updatedAnimal.y < 50 || updatedAnimal.y > (H - 50)) {
           updatedAnimal.vy *= -1;
         }
         
-        updatedAnimal.x = Math.max(50, Math.min(1150, updatedAnimal.x));
-        updatedAnimal.y = Math.max(50, Math.min(750, updatedAnimal.y));
+  updatedAnimal.x = Math.max(50, Math.min(W - 50, updatedAnimal.x));
+  updatedAnimal.y = Math.max(50, Math.min(H - 50, updatedAnimal.y));
         
         // Create tracks
         if (newState.time % 60 === 0) {
@@ -487,7 +502,9 @@ const RDR2TrackingGame: React.FC = () => {
     });
     
     // Render - COMPLETE!
-    ctx.clearRect(0, 0, 1200, 800);
+  const W = canvasRef.current?.width || 1200;
+  const H = canvasRef.current?.height || 800;
+  ctx.clearRect(0, 0, W, H);
     
     // Apply slow motion filter
     if (gameState.slowMotion) {
@@ -537,6 +554,16 @@ const RDR2TrackingGame: React.FC = () => {
 
   // Initialize game and setup event listeners
   useEffect(() => {
+    const handleResize = () => {
+      setCanvasSize({ width: window.innerWidth, height: window.innerHeight });
+      const c = canvasRef.current;
+      if (c) {
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+      }
+    };
+    window.addEventListener('resize', handleResize);
+
     // Initialize with some animals
     setGameState(prevState => ({
       ...prevState,
@@ -549,6 +576,7 @@ const RDR2TrackingGame: React.FC = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('resize', handleResize);
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
       }
@@ -565,6 +593,14 @@ const RDR2TrackingGame: React.FC = () => {
     };
   }, [gameLoop]);
 
+  // Ensure we cancel any pending animation frames as soon as analysis starts
+  useEffect(() => {
+    if (gameState.showAnalysis && gameLoopRef.current) {
+      cancelAnimationFrame(gameLoopRef.current);
+      gameLoopRef.current = null;
+    }
+  }, [gameState.showAnalysis]);
+
   // Update Eagle Eye status
   useEffect(() => {
     if (gameState.eagleEyeActive) {
@@ -578,6 +614,7 @@ const RDR2TrackingGame: React.FC = () => {
 
   // Analysis Screen Component
   const AnalysisScreen = () => {
+    const [scoreSubmitted, setScoreSubmitted] = React.useState(false);
     const totalTime = Math.floor(gameState.time / 60);
     const averageKillTime = gameState.killStats.length > 0 
       ? Math.floor(gameState.killStats.reduce((sum, stat) => sum + stat.killTime, 0) / gameState.killStats.length / 60)
@@ -586,6 +623,50 @@ const RDR2TrackingGame: React.FC = () => {
     const accuracyPercentage = gameState.killStats.length > 0 
       ? Math.round((accurateKills / gameState.killStats.length) * 100)
       : 0;
+
+    // Submit score to backend when analysis screen is first shown
+    React.useEffect(() => {
+      if (scoreSubmitted) return;
+
+      const submitScore = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const gameResult = {
+          mode: 'tracking',
+          score: gameState.score,
+          accuracy: accuracyPercentage,
+          reactionTime: averageKillTime * 1000, // Convert to milliseconds
+          strategyRating: Math.min(100, Math.max(0, gameState.score / 50)), // Strategy based on score
+          duration: totalTime * 1000, // Convert to milliseconds
+          timestamp: new Date()
+        };
+
+        try {
+          const response = await fetch('http://localhost:3001/performance/save-result', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(gameResult)
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Score saved successfully:', data);
+            if (data.isNewHighScore) {
+              console.log('🎉 New high score achieved!');
+            }
+            setScoreSubmitted(true);
+          }
+        } catch (error) {
+          console.error('Failed to save tracking game score:', error);
+        }
+      };
+
+      submitScore();
+    }, [scoreSubmitted, accuracyPercentage, averageKillTime, totalTime]); // Include dependencies
     
     const animalCounts = gameState.killStats.reduce((counts, stat) => {
       counts[stat.animalName] = (counts[stat.animalName] || 0) + 1;
@@ -871,7 +952,7 @@ const RDR2TrackingGame: React.FC = () => {
               <h3 className="text-2xl font-bold text-amber-300 mb-6 text-center">
                 🏆 Animal Tracking Leaderboard
               </h3>
-              <Leaderboard gameMode="tracking" />
+              <Leaderboard key="tracking-leaderboard" gameMode="tracking" />
             </div>
           </div>
 
@@ -912,7 +993,7 @@ const RDR2TrackingGame: React.FC = () => {
   };
 
   return (
-    <div className="relative bg-amber-900 min-h-screen overflow-hidden">
+    <div className="fixed inset-0 bg-amber-900 overflow-hidden">
       {/* HUD */}
       <div className="absolute top-5 left-5 text-white text-lg z-10 font-serif" 
            style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
@@ -936,9 +1017,9 @@ const RDR2TrackingGame: React.FC = () => {
       {/* Game Canvas */}
       <canvas
         ref={canvasRef}
-        width={1200}
-        height={800}
-        className="block mx-auto border-2 border-amber-700"
+        width={canvasSize.width}
+        height={canvasSize.height}
+        className="block w-screen h-screen border-2 border-amber-700"
         style={{
           background: 'linear-gradient(180deg, #87CEEB 0%, #90EE90 30%, #228B22 100%)'
         }}

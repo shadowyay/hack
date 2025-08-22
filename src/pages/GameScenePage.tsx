@@ -8,6 +8,7 @@ import OutlawChaseGame from '../components/game3/OutlawChaseGame';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import GameStatsOverlay from '../components/ui/GameStatsOverlay';
+import Leaderboard from '../components/ui/Leaderboard';
 import { useGame } from '../hooks/useGame';
 import { useTimer } from '../hooks/useTimer';
 import type { GameModeConfig, GameScenario } from '../types';
@@ -30,6 +31,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
   const [showScenarioIntro, setShowScenarioIntro] = useState(true);
   const [showStatsOverlay, setShowStatsOverlay] = useState(false);
   const [currentScenario, setCurrentScenario] = useState<GameScenario | null>(null);
+  const [duelDifficulty, setDuelDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
 
   // Get user data for leaderboard
   const userData = localStorage.getItem('user');
@@ -194,6 +196,14 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
       setShowScenarioIntro(false);
       startGame(mode.mode, currentScenario);
       startTimer();
+      // If Duel, push selected difficulty to the game shortly after scene boot
+      if (mode.mode === 'duel') {
+        setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent('DUEL_SET_DIFFICULTY', { detail: { level: duelDifficulty } })
+          );
+        }, 150);
+      }
     }
   };
 
@@ -236,7 +246,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
 
   return (
     <div
-      className="min-h-screen relative overflow-y-auto"
+      className="min-h-screen relative"
       style={{
         backgroundImage: `url('${backgroundImage}')`,
         backgroundSize: 'cover',
@@ -249,63 +259,147 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
         isOpen={showScenarioIntro}
         onClose={() => setShowScenarioIntro(false)}
         title={currentScenario.environment.name}
-        className="max-w-3xl"
+        className=""
+        hideClose
+        fullScreen
       >
-        <div className="space-y-6">
-          {/* Scenario Description */}
-          <div className="glass p-6">
-            <h3 className="text-2xl font-western text-white mb-4 text-center">
-              📜 The Scenario
-            </h3>
-            <p className="text-white/80 font-elegant text-lg leading-relaxed text-center italic">
-              "{currentScenario.description}"
-            </p>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Left Column - Scenario Info */}
+          <div className="lg:col-span-2 space-y-4">
+            {/* Scenario Description */}
+            <div className="glass p-4 break-words border-2 border-white/10 rounded-xl">
+              <h3 className="text-xl font-western text-white mb-3 text-center">
+                📜 The Scenario
+              </h3>
+              <p className="text-white/80 font-elegant text-base leading-relaxed text-center italic">
+                "{currentScenario.description}"
+              </p>
+            </div>
 
-          {/* Environment Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="glass p-4">
-              <h4 className="font-western text-white mb-3">🌍 Environment</h4>
-              <div className="space-y-2 text-sm font-elegant text-white/80">
-                <div>Time: {currentScenario.environment.timeOfDay}</div>
-                <div>Weather: {currentScenario.environment.weather}</div>
-                <div>Difficulty: {currentScenario.difficulty}</div>
+            {/* Environment Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="glass p-3 break-words border-2 border-white/10 rounded-xl">
+                <h4 className="font-western text-white mb-2">🌍 Environment</h4>
+                <div className="space-y-1 text-sm font-elegant text-white/80">
+                  <div>Time: {currentScenario.environment.timeOfDay}</div>
+                  <div>Weather: {currentScenario.environment.weather}</div>
+                  <div>Difficulty: {currentScenario.difficulty}</div>
+                </div>
+              </div>
+
+              <div className="glass p-3 break-words border-2 border-white/10 rounded-xl">
+                <h4 className="font-western text-white mb-2">🤠 Opponent</h4>
+                <div className="space-y-1 text-sm font-elegant text-white/80">
+                  <div className="font-bold">{currentScenario.aiOpponent.name}</div>
+                  <div>{currentScenario.aiOpponent.personality}</div>
+                  <div>Skill Level: {Math.round(currentScenario.aiOpponent.skill * 100)}%</div>
+                </div>
               </div>
             </div>
 
-            <div className="glass p-4">
-              <h4 className="font-western text-white mb-3">🤠 Opponent</h4>
-              <div className="space-y-2 text-sm font-elegant text-white/80">
-                <div className="font-bold">{currentScenario.aiOpponent.name}</div>
-                <div>{currentScenario.aiOpponent.personality}</div>
-                <div>Skill Level: {Math.round(currentScenario.aiOpponent.skill * 100)}%</div>
+            {/* Objectives */}
+            <div className="glass p-3 break-words border-2 border-white/10 rounded-xl">
+              <h4 className="font-western text-white mb-2">🎯 Objectives</h4>
+              <ul className="space-y-1">
+                {currentScenario.objectives.map((objective, index) => (
+                  <li key={index} className="flex items-center text-white/80 font-elegant text-sm">
+                    <span className="text-white/60 mr-2 leading-none">•</span>
+                    {objective}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Start Button + Difficulty (Duel) */}
+            <div className="pt-2 flex flex-col items-center justify-center">
+              {mode.mode === 'duel' && (
+                <div className="mb-3 flex flex-col items-center">
+                  <span className="text-white/70 font-elegant text-sm mb-1">Select difficulty</span>
+                  <div className="inline-flex rounded-md overflow-hidden border border-white/10">
+                    {(['easy','medium','hard'] as const).map((lvl) => (
+                      <button
+                        key={lvl}
+                        onClick={() => setDuelDifficulty(lvl)}
+                        className={
+                          `px-3 py-1 text-sm font-western capitalize ${
+                            duelDifficulty === lvl
+                              ? 'bg-wild-west-600/80 text-white'
+                              : 'bg-black/30 text-white/70 hover:text-white'
+                          } ${lvl !== 'hard' ? 'border-r border-white/10' : ''}`
+                        }
+                        aria-pressed={duelDifficulty === lvl}
+                      >
+                        {lvl}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* User's Current Rank Display */}
+              {user && (
+                <div className="mb-3 glass p-2 inline-block">
+                  <p className="text-wild-west-400 text-xs font-elegant mb-1">
+                    Your current {mode.mode} ranking:
+                  </p>
+                  <div className="text-wild-west-300 font-western text-base">
+                    {/* This will be populated by the leaderboard component showing user rank */}
+                    🎯 Ready to make your mark?
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-1">
+                <Button
+                  variant="western"
+                  size="lg"
+                  onClick={handleStartGame}
+                  className="button-modern text-lg px-6 py-3"
+                >
+                  🔫 BEGIN {mode.mode.toUpperCase()}
+                </Button>
               </div>
+              
+              {!user && (
+                <p className="text-wild-west-500 text-xs font-elegant mt-2">
+                  Sign up to compete on the leaderboards!
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Objectives */}
-          <div className="glass p-4">
-            <h4 className="font-western text-white mb-3">🎯 Objectives</h4>
-            <ul className="space-y-2">
-              {currentScenario.objectives.map((objective, index) => (
-                <li key={index} className="flex items-center text-white/80 font-elegant">
-                  <span className="text-white/60 mr-2">•</span>
-                  {objective}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Start Button */}
-          <div className="text-center pt-4">
-            <Button
-              variant="western"
-              size="xl"
-              onClick={handleStartGame}
-              className="button-modern text-xl px-8 py-4"
-            >
-              🔫 BEGIN DUEL
-            </Button>
+          {/* Right Column - Game-Specific Leaderboard */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4 space-y-3">
+              {/* Challenge Header */}
+              <div className="glass p-3 text-center border-2 border-white/10 rounded-xl">
+                <h3 className="font-western text-lg text-wild-west-300 mb-1">
+                  {mode.mode === 'duel' && '🤠 Can You Beat These Legends?'}
+                  {mode.mode === 'chase' && '🐎 Fastest Outlaws In The West'}
+                  {mode.mode === 'tracking' && '🎯 Master Hunters Hall'}
+                </h3>
+                <p className="text-wild-west-400 text-xs font-elegant">
+                  {mode.mode === 'duel' && 'Prove your quick draw skills against the best'}
+                  {mode.mode === 'chase' && 'Show them how a real outlaw escapes'}
+                  {mode.mode === 'tracking' && 'Hunt with the precision of a legend'}
+                </p>
+              </div>
+              
+              {/* Leaderboard */}
+              <Leaderboard
+                gameMode={mode.mode}
+                limit={6}
+                showUserRank={!!user}
+                userId={user?.id}
+                compact
+              />
+              
+              {/* Motivation Footer */}
+              <div className="glass p-2 text-center border-2 border-white/10 rounded-xl">
+                <p className="text-wild-west-500 text-[11px] font-elegant italic">
+                  "Every legend started with their first draw"
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </Modal>
@@ -362,14 +456,14 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
         </div>
       </Modal>
 
-  {/* Game Canvas */}
-  <div className="relative w-full" style={{ minHeight: '600px' }}>
+  {/* Game Canvas - fullscreen wrapper */}
+  <div className="fixed inset-0 w-screen h-screen">
         <AnimatePresence>
           {gameState.isPlaying && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
               className="absolute inset-0"
             >

@@ -84,23 +84,31 @@ const OutlawChaseGame = () => {
     totalScore: 0
   });
   
-  const GAME_WIDTH = 800;
-  const GAME_HEIGHT = 600;
+  const [viewport, setViewport] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 800,
+    height: typeof window !== 'undefined' ? window.innerHeight : 600,
+  });
+
+  useEffect(() => {
+    const onResize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
   
   // Generate random obstacles
-  const generateObstacles = () => {
+  const generateObstacles = useCallback(() => {
     const obstacles = [];
     for (let i = 0; i < 8; i++) {
       obstacles.push({
-        x: Math.random() * (GAME_WIDTH - 60) + 30,
-        y: Math.random() * (GAME_HEIGHT - 60) + 30,
+        x: Math.random() * (viewport.width - 60) + 30,
+        y: Math.random() * (viewport.height - 60) + 30,
         width: 40,
         height: 40,
         type: Math.random() > 0.5 ? 'rock' : 'tree'
       });
     }
     return obstacles;
-  };
+  }, [viewport.height, viewport.width]);
   
   // Initialize game
   const initializeGame = useCallback(() => {
@@ -116,7 +124,7 @@ const OutlawChaseGame = () => {
     setEnemies([]);
     setBullets([]);
     setEnemyBullets([]);
-    setObstacles(generateObstacles());
+  setObstacles(generateObstacles());
     setScore(0);
     setWave(1);
     setGameTime(0);
@@ -133,7 +141,7 @@ const OutlawChaseGame = () => {
       currentCombo: 0,
       totalScore: 0
     });
-  }, []);
+  }, [generateObstacles]);
   
   // Spawn enemies
   const spawnEnemies = useCallback(() => {
@@ -145,17 +153,17 @@ const OutlawChaseGame = () => {
       let x, y;
       
       if (side < 0.25) { // Top
-        x = Math.random() * GAME_WIDTH;
+  x = Math.random() * viewport.width;
         y = -50;
       } else if (side < 0.5) { // Right
-        x = GAME_WIDTH + 50;
-        y = Math.random() * GAME_HEIGHT;
+  x = viewport.width + 50;
+  y = Math.random() * viewport.height;
       } else if (side < 0.75) { // Bottom
-        x = Math.random() * GAME_WIDTH;
-        y = GAME_HEIGHT + 50;
+  x = Math.random() * viewport.width;
+  y = viewport.height + 50;
       } else { // Left
         x = -50;
-        y = Math.random() * GAME_HEIGHT;
+  y = Math.random() * viewport.height;
       }
       
       newEnemies.push({
@@ -170,7 +178,7 @@ const OutlawChaseGame = () => {
     }
     
     setEnemies(newEnemies);
-  }, [wave]);
+  }, [wave, viewport.height, viewport.width]);
   
   // Handle keyboard input
   useEffect(() => {
@@ -205,7 +213,7 @@ const OutlawChaseGame = () => {
   useEffect(() => {
     if (gameState !== 'playing') return;
     
-    const gameLoop = setInterval(() => {
+  const gameLoop = setInterval(() => {
       setGameTime(prev => prev + 1);
       
       // Move player
@@ -219,8 +227,8 @@ const OutlawChaseGame = () => {
         if (keys['s'] || keys['arrowdown']) newY += prev.speed;
         
         // Boundary check
-        newX = Math.max(0, Math.min(GAME_WIDTH - 30, newX));
-        newY = Math.max(0, Math.min(GAME_HEIGHT - 30, newY));
+  newX = Math.max(0, Math.min(viewport.width - 30, newX));
+  newY = Math.max(0, Math.min(viewport.height - 30, newY));
         
         // Obstacle collision
         let collided = false;
@@ -278,8 +286,8 @@ const OutlawChaseGame = () => {
           let newY = enemy.y + moveY;
           
           // Boundary check for enemies
-          newX = Math.max(-10, Math.min(GAME_WIDTH + 10, newX));
-          newY = Math.max(-10, Math.min(GAME_HEIGHT + 10, newY));
+          newX = Math.max(-10, Math.min(viewport.width + 10, newX));
+          newY = Math.max(-10, Math.min(viewport.height + 10, newY));
           
           // Enemy shooting
           const now = Date.now();
@@ -312,8 +320,8 @@ const OutlawChaseGame = () => {
           y: bullet.y + bullet.dy
         }))
         .filter(bullet => 
-          bullet.x > -10 && bullet.x < GAME_WIDTH + 10 &&
-          bullet.y > -10 && bullet.y < GAME_HEIGHT + 10
+          bullet.x > -10 && bullet.x < viewport.width + 10 &&
+          bullet.y > -10 && bullet.y < viewport.height + 10
         )
       );
       
@@ -324,8 +332,8 @@ const OutlawChaseGame = () => {
           y: bullet.y + bullet.dy
         }))
         .filter(bullet => 
-          bullet.x > -10 && bullet.x < GAME_WIDTH + 10 &&
-          bullet.y > -10 && bullet.y < GAME_HEIGHT + 10
+          bullet.x > -10 && bullet.x < viewport.width + 10 &&
+          bullet.y > -10 && bullet.y < viewport.height + 10
         )
       );
       
@@ -421,7 +429,7 @@ const OutlawChaseGame = () => {
     }, 16); // ~60 FPS
     
     return () => clearInterval(gameLoop);
-  }, [gameState, keys, player, enemies, obstacles, gameTime, wave]);
+  }, [gameState, keys, player, enemies, obstacles, gameTime, wave, viewport.height, viewport.width]);
   
   // Check win/lose conditions
   useEffect(() => {
@@ -472,9 +480,54 @@ const OutlawChaseGame = () => {
 
   // Analysis Screen Component
   const AnalysisScreen = () => {
+    const [scoreSubmitted, setScoreSubmitted] = useState(false);
     const totalTime = Math.floor(gameStats.survivalTime / 60);
     const accuracy = gameStats.shotsFired > 0 ? Math.round((gameStats.shotsHit / gameStats.shotsFired) * 100) : 0;
     const isVictory = gameStats.wavesSurvived >= 5;
+    
+    // Submit score to backend when analysis screen is first shown
+    useEffect(() => {
+      if (scoreSubmitted) return;
+
+      const submitScore = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const gameResult = {
+          mode: 'chase',
+          score: gameStats.totalScore,
+          accuracy: accuracy,
+          reactionTime: gameStats.survivalTime / gameStats.enemiesKilled || 1000, // Average time per kill
+          strategyRating: Math.min(100, gameStats.maxCombo * 5), // Strategy based on combo
+          duration: gameStats.survivalTime,
+          timestamp: new Date()
+        };
+
+        try {
+          const response = await fetch('http://localhost:3001/performance/save-result', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(gameResult)
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Chase game score saved successfully:', data);
+            if (data.isNewHighScore) {
+              console.log('🎉 New chase high score achieved!');
+            }
+            setScoreSubmitted(true);
+          }
+        } catch (error) {
+          console.error('Failed to save chase game score:', error);
+        }
+      };
+
+      submitScore();
+    }, [scoreSubmitted, accuracy]); // Simplified dependencies
     
     // Performance calculations
     const getOutlawGrade = (accuracy: number, score: number, waves: number): { grade: string; color: string; description: string } => {
@@ -795,9 +848,9 @@ const OutlawChaseGame = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-orange-800 to-yellow-700 p-4">
+  <div className="fixed inset-0 bg-gradient-to-b from-orange-800 to-yellow-700">
       {/* UI */}
-      <div className="flex justify-between w-full max-w-4xl mb-2 text-white font-bold">
+      <div className="flex justify-between w-full px-6 py-3 text-white font-bold">
         <div className="flex gap-6">
           <div className="bg-black bg-opacity-50 px-4 py-2 rounded border border-yellow-600">
             Health: {player.health}
@@ -819,8 +872,8 @@ const OutlawChaseGame = () => {
       
       {/* Game Area */}
       <div 
-        className="relative bg-gradient-to-br from-yellow-600 to-orange-700 border-4 border-yellow-900 shadow-2xl"
-        style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}
+        className="relative bg-gradient-to-br from-yellow-600 to-orange-700 border-4 border-yellow-900 shadow-2xl mx-auto"
+        style={{ width: Math.max(320, viewport.width), height: Math.max(240, viewport.height) }}
       >
         {/* Obstacles */}
         {obstacles.map((obstacle, index) => (
@@ -875,7 +928,7 @@ const OutlawChaseGame = () => {
       </div>
       
       {/* Instructions */}
-      <div className="mt-2 text-center text-white">
+  <div className="absolute bottom-2 left-0 right-0 text-center text-white">
         <p>WASD/Arrows: Move | SPACE/J: Shoot | Survive all waves!</p>
       </div>
     </div>
