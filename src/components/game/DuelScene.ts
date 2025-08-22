@@ -24,8 +24,6 @@ export default class DuelScene extends Phaser.Scene {
   // Private state
   private player!: Phaser.Physics.Arcade.Sprite;
   private opponent!: Phaser.Physics.Arcade.Sprite;
-  private playerVis!: Phaser.GameObjects.Rectangle;
-  private botVis!: Phaser.GameObjects.Rectangle;
   private bullets!: Phaser.Physics.Arcade.Group;
   private aiBullets!: Phaser.Physics.Arcade.Group;
   private obstacles!: Phaser.Physics.Arcade.StaticGroup;
@@ -47,6 +45,7 @@ export default class DuelScene extends Phaser.Scene {
   private gameEnded = false;
   private aiConfig = { approach: 150, retreat: 130, jump: 18, shoot: 60, bullet: 500, tick: 200 };
   private aiTimer!: Phaser.Time.TimerEvent;
+  private gameStartTime = 0;
 
   // Ground level for consistent spawning
   private groundLevel!: number;
@@ -54,6 +53,58 @@ export default class DuelScene extends Phaser.Scene {
   preload() {
     // Generate simple 1x1 pixel for particles and bullets
     this.textures.generate('pixel', { data: ['1'], pixelWidth: 1 });
+    
+    // Create cowboy sprites using graphics
+    this.createCowboyTextures();
+  }
+
+  private createCowboyTextures() {
+    // Player cowboy (blue)
+    const playerGraphics = this.add.graphics();
+    playerGraphics.fillStyle(0x8B4513); // Brown hat
+    playerGraphics.fillEllipse(15, 8, 20, 12);
+    playerGraphics.fillStyle(0xFFDBB5); // Skin tone
+    playerGraphics.fillEllipse(15, 18, 12, 14);
+    playerGraphics.fillStyle(0x0066CC); // Blue shirt
+    playerGraphics.fillRect(10, 25, 10, 20);
+    playerGraphics.fillStyle(0x654321); // Brown pants
+    playerGraphics.fillRect(11, 45, 8, 15);
+    playerGraphics.fillStyle(0x8B4513); // Brown boots
+    playerGraphics.fillRect(10, 58, 4, 6);
+    playerGraphics.fillRect(16, 58, 4, 6);
+    // Gun holster
+    playerGraphics.fillStyle(0x2F1B14);
+    playerGraphics.fillRect(8, 35, 3, 8);
+    playerGraphics.generateTexture('player-cowboy', 30, 64);
+    playerGraphics.destroy();
+
+    // AI cowboy (red)
+    const aiGraphics = this.add.graphics();
+    aiGraphics.fillStyle(0x2F1B14); // Black hat
+    aiGraphics.fillEllipse(15, 8, 20, 12);
+    aiGraphics.fillStyle(0xFFDBB5); // Skin tone
+    aiGraphics.fillEllipse(15, 18, 12, 14);
+    aiGraphics.fillStyle(0xCC0000); // Red shirt
+    aiGraphics.fillRect(10, 25, 10, 20);
+    aiGraphics.fillStyle(0x654321); // Brown pants
+    aiGraphics.fillRect(11, 45, 8, 15);
+    aiGraphics.fillStyle(0x8B4513); // Brown boots
+    aiGraphics.fillRect(10, 58, 4, 6);
+    aiGraphics.fillRect(16, 58, 4, 6);
+    // Gun holster
+    aiGraphics.fillStyle(0x2F1B14);
+    aiGraphics.fillRect(19, 35, 3, 8);
+    aiGraphics.generateTexture('ai-cowboy', 30, 64);
+    aiGraphics.destroy();
+
+    // Bullet texture
+    const bulletGraphics = this.add.graphics();
+    bulletGraphics.fillStyle(0xFFD700); // Gold bullet
+    bulletGraphics.fillEllipse(6, 3, 12, 6);
+    bulletGraphics.fillStyle(0xB8860B); // Darker gold tip
+    bulletGraphics.fillEllipse(10, 3, 4, 4);
+    bulletGraphics.generateTexture('bullet', 12, 6);
+    bulletGraphics.destroy();
   }
 
   create() {
@@ -62,11 +113,19 @@ export default class DuelScene extends Phaser.Scene {
     // Set ground level consistently
     this.groundLevel = Math.floor(height * 0.6);
 
-    // 1) Background – RDR2-style desert
+    // 1) Background – RDR2-style desert with sun
     const sky = this.add.graphics();
     sky.fillGradientStyle(0x87ceeb, 0x87ceeb, 0xffd700, 0xff4500, 1);
     sky.fillRect(0, 0, width, height * 0.6);
     sky.setDepth(0);
+
+    // Add sun in the sky
+    const sun = this.add.graphics();
+    sun.fillStyle(0xFFFF00, 0.9); // Bright yellow sun
+    sun.fillCircle(width * 0.8, height * 0.15, 40);
+    sun.fillStyle(0xFFA500, 0.7); // Orange glow
+    sun.fillCircle(width * 0.8, height * 0.15, 50);
+    sun.setDepth(1);
 
     const ground = this.add.graphics();
     ground.fillStyle(0x8b4513, 1);
@@ -77,7 +136,8 @@ export default class DuelScene extends Phaser.Scene {
     this.add.graphics()
       .fillStyle(0xffffff, 0.6)
       .fillEllipse(width * 0.2, 80, 100, 50)
-      .fillEllipse(width * 0.7, 60, 120, 60);
+      .fillEllipse(width * 0.7, 60, 120, 60)
+      .setDepth(1);
 
     // Mesa silhouettes in background
     const mesa = this.add.graphics();
@@ -127,15 +187,11 @@ export default class DuelScene extends Phaser.Scene {
     // Both spawn just above the ground surface to land on it properly
     const spawnY = this.groundLevel - 30; // 30 pixels above ground surface for both
 
-    this.player = this.physics.add.sprite(playerSpawnX, spawnY, 'pixel')
-      .setDisplaySize(30, 60)
-      .setTint(0x00a2ff) // Bright blue cowboy
+    this.player = this.physics.add.sprite(playerSpawnX, spawnY, 'player-cowboy')
       .setCollideWorldBounds(true)
       .setDepth(5);
 
-    this.opponent = this.physics.add.sprite(botSpawnX, spawnY, 'pixel')
-      .setDisplaySize(30, 60)
-      .setTint(0xff3300) // Red cowboy
+    this.opponent = this.physics.add.sprite(botSpawnX, spawnY, 'ai-cowboy')
       .setCollideWorldBounds(true)
       .setDepth(5);
 
@@ -144,29 +200,21 @@ export default class DuelScene extends Phaser.Scene {
     (this.opponent.body as Phaser.Physics.Arcade.Body).setSize(30, 60, true);
 
     // Name labels for visibility
-    this.playerLabel = this.add.text(this.player.x, this.player.y - 50, 'PLAYER', { 
+    this.playerLabel = this.add.text(this.player.x, this.player.y - 40, 'PLAYER', { 
       color: '#ffffff', 
-      fontSize: '14px',
+      fontSize: '12px',
       fontFamily: 'serif',
       backgroundColor: '#000000',
       padding: { x: 4, y: 2 }
     }).setOrigin(0.5).setDepth(8);
     
-    this.botLabel = this.add.text(this.opponent.x, this.opponent.y - 50, 'BOT', { 
+    this.botLabel = this.add.text(this.opponent.x, this.opponent.y - 40, 'BOT', { 
       color: '#ffffff', 
-      fontSize: '14px',
+      fontSize: '12px',
       fontFamily: 'serif',
       backgroundColor: '#000000',
       padding: { x: 4, y: 2 }
     }).setOrigin(0.5).setDepth(8);
-
-    // Strong visual rectangles that follow sprites (debug/visibility)
-    this.playerVis = this.add.rectangle(this.player.x, this.player.y, 30, 60, 0x00a2ff, 0.6)
-      .setDepth(9)
-      .setStrokeStyle(2, 0xffffff);
-    this.botVis = this.add.rectangle(this.opponent.x, this.opponent.y, 30, 60, 0xff3300, 0.6)
-      .setDepth(9)
-      .setStrokeStyle(2, 0xffffff);
 
     // 5) Physics collisions - CRITICAL: Add colliders for both characters
     this.physics.add.collider(this.player, this.groundPlatform);
@@ -207,7 +255,10 @@ export default class DuelScene extends Phaser.Scene {
       bullet.destroy();
       this.gameEnded = true;
       this.hits++;
-      this.score += 1000; // Victory bonus
+      
+      const finalScore = this.calculateFinalScore(true);
+      this.score = finalScore;
+      
       this.opponent.setTint(0xffffff).setAlpha(0.3);
       this.cameras.main.flash(500, 255, 255, 255);
       this.puff.emitParticleAt(this.opponent.x, this.opponent.y);
@@ -221,12 +272,13 @@ export default class DuelScene extends Phaser.Scene {
       
       // Dispatch game end event
       this.time.delayedCall(2000, () => {
+        const gameDuration = (this.time.now - this.gameStartTime) / 1000;
         window.dispatchEvent(new CustomEvent('GAME_END', {
           detail: {
-            score: this.score,
+            score: finalScore,
             accuracy: this.shots ? (this.hits / this.shots * 100) : 0,
-            reactionTime: 300,
-            strategyRating: 85
+            reactionTime: Math.max(200, Math.min(500, gameDuration * 100)),
+            strategyRating: Math.min(100, 60 + (this.playerAmmo * 4) + (finalScore > 2000 ? 25 : 0))
           }
         }));
       });
@@ -236,6 +288,10 @@ export default class DuelScene extends Phaser.Scene {
       if (this.gameEnded) return;
       bullet.destroy();
       this.gameEnded = true;
+      
+      const finalScore = this.calculateFinalScore(false);
+      this.score = finalScore;
+      
       this.player.setTint(0xff0000).setAlpha(0.3);
       this.cameras.main.flash(500, 255, 0, 0);
       this.puff.emitParticleAt(this.player.x, this.player.y);
@@ -249,12 +305,13 @@ export default class DuelScene extends Phaser.Scene {
       
       // Dispatch game end event
       this.time.delayedCall(2000, () => {
+        const gameDuration = (this.time.now - this.gameStartTime) / 1000;
         window.dispatchEvent(new CustomEvent('GAME_END', {
           detail: {
-            score: this.score,
+            score: finalScore,
             accuracy: this.shots ? (this.hits / this.shots * 100) : 0,
-            reactionTime: 500,
-            strategyRating: 50
+            reactionTime: Math.max(400, Math.min(800, gameDuration * 150)),
+            strategyRating: Math.max(20, Math.min(60, this.shots * 5))
           }
         }));
       });
@@ -289,6 +346,9 @@ export default class DuelScene extends Phaser.Scene {
       this.setDifficulty(level);
     });
 
+    // Track game start time for scoring
+    this.gameStartTime = this.time.now;
+
     // 11) Game instructions
     this.add.text(width / 2, 30, 'HIGH NOON DUEL', {
       fontSize: '32px',
@@ -317,22 +377,14 @@ export default class DuelScene extends Phaser.Scene {
       this.updateStats();
     }
     
-    // Keep visual rectangles aligned to physics sprites
-    if (this.playerVis && this.player) {
-      this.playerVis.x = this.player.x;
-      this.playerVis.y = this.player.y;
-    }
-    if (this.botVis && this.opponent) {
-      this.botVis.x = this.opponent.x;
-      this.botVis.y = this.opponent.y;
-    }
+    // Keep labels aligned to sprites
     if (this.playerLabel && this.player) {
       this.playerLabel.x = this.player.x;
-      this.playerLabel.y = this.player.y - 50;
+      this.playerLabel.y = this.player.y - 40;
     }
     if (this.botLabel && this.opponent) {
       this.botLabel.x = this.opponent.x;
-      this.botLabel.y = this.opponent.y - 50;
+      this.botLabel.y = this.opponent.y - 40;
     }
   }
 
@@ -368,6 +420,41 @@ export default class DuelScene extends Phaser.Scene {
     }
   }
 
+  private calculateFinalScore(won: boolean): number {
+    const gameDuration = (this.time.now - this.gameStartTime) / 1000; // in seconds
+    let finalScore = this.score;
+
+    if (won) {
+      // Base victory bonus
+      finalScore += 1000;
+      
+      // Time bonus (faster = more points)
+      const timeBonus = Math.max(0, Math.floor((30 - gameDuration) * 20)); // Up to 600 points for very fast wins
+      finalScore += timeBonus;
+      
+      // Accuracy bonus
+      const accuracy = this.shots > 0 ? (this.hits / this.shots) : 0;
+      const accuracyBonus = Math.floor(accuracy * 500); // Up to 500 points for perfect accuracy
+      finalScore += accuracyBonus;
+      
+      // Ammo conservation bonus
+      const ammoBonus = this.playerAmmo * 25; // 25 points per bullet saved
+      finalScore += ammoBonus;
+      
+      // Difficulty multiplier
+      const difficultyMultiplier = this.aiConfig.tick === 150 ? 1.5 : // hard
+                                  this.aiConfig.tick === 200 ? 1.2 : // medium  
+                                  1.0; // easy
+      finalScore = Math.floor(finalScore * difficultyMultiplier);
+    } else {
+      // Even in defeat, award some points for effort
+      finalScore += Math.floor(this.shots * 10); // 10 points per shot fired
+      finalScore += Math.floor((this.hits / Math.max(this.shots, 1)) * 200); // Accuracy points
+    }
+
+    return Math.max(0, finalScore);
+  }
+
   private fireBullet() {
     if (this.playerAmmo <= 0 || this.gameEnded) return;
     
@@ -375,10 +462,9 @@ export default class DuelScene extends Phaser.Scene {
     const bullet = this.bullets.create(
       this.player.x + (direction * 25), 
       this.player.y - 10, 
-      'pixel'
+      'bullet'
     ) as Phaser.Physics.Arcade.Image;
     
-    bullet.setDisplaySize(12, 4).setTint(0xffff00); // Yellow bullet
     const body = bullet.body as Phaser.Physics.Arcade.Body;
     if (body) {
       body.setVelocity(direction * 600, 0);
@@ -411,10 +497,10 @@ export default class DuelScene extends Phaser.Scene {
     const bullet = this.aiBullets.create(
       this.opponent.x + (direction * 25), 
       this.opponent.y - 10, 
-      'pixel'
+      'bullet'
     ) as Phaser.Physics.Arcade.Image;
     
-    bullet.setDisplaySize(12, 4).setTint(0xff0000); // Red bullet
+    bullet.setTint(0xFF4444); // Red tint for AI bullets
     const body = bullet.body as Phaser.Physics.Arcade.Body;
     if (body) {
       body.setVelocity(direction * this.aiConfig.bullet, 0);
