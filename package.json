@@ -13,7 +13,9 @@
     "start:ai": "cd ai_service && uvicorn main:app --host 0.0.0.0 --port 5001",
     "install:ai": "cd ai_service && pip install -r requirements.txt",
     "start:all": "concurrently \"npm run start:frontend\" \"npm run start:backend\" \"npm run start:ai\" --names \"🎮Frontend,🖥️Backend,🤖AI\" --prefix-colors \"magenta,green,blue\" --kill-others-on-fail",
-    "hackathon": "npm run install:ai && npm run start:all"
+    "hackathon": "npm run install:ai && npm run start:all",
+    "deploy:vercel": "vercel --prod",
+    "build:production": "NODE_ENV=production npm run build"
   },
   "dependencies": {
     "@types/gsap": "^1.20.2",

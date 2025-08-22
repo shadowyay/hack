@@ -1,0 +1,36 @@
+services:
+  # Backend Service
+  - type: web
+    name: bounty-hunters-backend
+    runtime: node
+    repo: https://github.com/shadowyay/hack.git
+    branch: main
+    buildCommand: chmod +x build-backend.sh && ./build-backend.sh
+    startCommand: cd src/backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGO_URI
+        sync: false  # Set this manually in Render dashboard
+      - key: JWT_SECRET
+        sync: false  # Set this manually in Render dashboard
+      - key: CORS_ORIGIN
+        sync: false  # Set this manually in Render dashboard
+
+  # AI Service
+  - type: web
+    name: bounty-hunters-ai
+    runtime: python
+    repo: https://github.com/shadowyay/hack.git
+    branch: main
+    buildCommand: chmod +x build-ai.sh && ./build-ai.sh
+    startCommand: cd ai_service && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.4
+      - key: ENVIRONMENT
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false  # Set this manually in Render dashboard
