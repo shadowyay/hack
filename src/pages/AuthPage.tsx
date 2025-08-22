@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Button from '../components/ui/Button';
+import apiConfig from '../utils/apiConfig';
 
 interface AuthPageProps {
   onLogin: (userData: { username: string; email: string; id: string }) => void;
@@ -43,7 +44,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, onGoBack }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:3001/auth/login', {
+      const response = await fetch(apiConfig.auth.login, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,7 +87,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onLogin, onGoBack }) => {
     }
 
     try {
-      const response = await fetch('http://localhost:3001/auth/register', {
+      const response = await fetch(apiConfig.auth.register, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import Button from '../components/ui/Button';
 import Leaderboard from '../components/ui/Leaderboard';
 import type { GameMode } from '../types';
+import apiConfig from '../utils/apiConfig';
 
 interface LeaderboardPageProps {
   onGoBack: () => void;
@@ -166,7 +167,7 @@ const GameSpecificStats: React.FC<GameSpecificStatsProps> = ({ userId, selectedM
   const fetchUserStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/auth/profile', {
+      const response = await fetch(apiConfig.auth.profile, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
