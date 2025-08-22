@@ -604,15 +604,18 @@ const RDR2TrackingGame: React.FC = () => {
     };
   }, [spawnAnimal, handleKeyDown, handleKeyUp]);
 
-  // Start game loop
+
+  // Start or resume game loop
   useEffect(() => {
-    gameLoopRef.current = requestAnimationFrame(gameLoop);
+    if (!isPaused && !gameState.showAnalysis) {
+      gameLoopRef.current = requestAnimationFrame(gameLoop);
+    }
     return () => {
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
       }
     };
-  }, [gameLoop]);
+  }, [gameLoop, isPaused, gameState.showAnalysis]);
 
   // Ensure we cancel any pending animation frames as soon as analysis starts
   useEffect(() => {

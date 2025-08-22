@@ -1,5 +1,6 @@
 // src/components/GameCanvas.tsx (unchanged)
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
+import { GameContext } from '../../context/GameContext';
 import Phaser from 'phaser';
 import DuelScene from './DuelScene';
 
@@ -9,6 +10,9 @@ interface Props {
 
 const GameCanvas: React.FC<Props> = ({ mode }) => {
   const gameRef = useRef<Phaser.Game | null>(null);
+
+  const gameContext = useContext(GameContext);
+  const isPaused = gameContext?.gameState?.isPaused;
 
   useEffect(() => {
     const config: Phaser.Types.Core.GameConfig = {
@@ -47,7 +51,19 @@ const GameCanvas: React.FC<Props> = ({ mode }) => {
     return () => {
       window.removeEventListener('resize', handleResize);
     };
-  }, [mode]); // Remove onGameEnd from dependencies
+  }, [mode]);
+
+  // Pause/resume Phaser game when isPaused changes
+  useEffect(() => {
+    if (gameRef.current && gameRef.current.scene) {
+      const sceneKey = gameRef.current.scene.scenes[0]?.scene.key || 'default';
+      if (isPaused) {
+        gameRef.current.scene.pause(sceneKey);
+      } else {
+        gameRef.current.scene.resume(sceneKey);
+      }
+    }
+  }, [isPaused]);
 
   // Cleanup only on unmount
   useEffect(() => {
