@@ -21,7 +21,7 @@ const GameCanvas: React.FC<Props> = ({ mode }) => {
         default: 'arcade', 
         arcade: { 
           gravity: { x: 0, y: 800 },
-          debug: true 
+          debug: false 
         } 
       },
       scale: { 

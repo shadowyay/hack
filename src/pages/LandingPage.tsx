@@ -69,7 +69,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining, onShowLeader
   ));
 
   return (
-    <div className="min-h-screen relative bg-vignette bg-grid">
+    <div className="h-screen overflow-hidden relative bg-vignette bg-grid">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-30">
         {dustParticles}
@@ -94,7 +94,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining, onShowLeader
       </div>
 
       {/* Mountains silhouette */}
-      <div className="absolute bottom-0 left-0 right-0 h-64">
+      <div className="absolute bottom-0 left-0 right-0 h-32">
         <svg
           viewBox="0 0 1200 300"
           className="w-full h-full fill-black opacity-20"
@@ -105,18 +105,18 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining, onShowLeader
       </div>
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 text-center">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full px-4 text-center">
         {/* Main Title */}
         <motion.div
           variants={titleVariants}
           initial="hidden"
           animate="visible"
-          className="mb-8"
+          className="mb-4"
         >
-          <h1 className="text-6xl md:text-8xl font-western text-white drop-shadow mb-4">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-western text-white drop-shadow mb-2">
             BOUNTY HUNTER'S
           </h1>
-          <h1 className="text-5xl md:text-7xl font-western text-white/90 drop-shadow">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-western text-white/90 drop-shadow">
             TRAINING GROUND
           </h1>
         </motion.div>
@@ -126,7 +126,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining, onShowLeader
           variants={subtitleVariants}
           initial="hidden"
           animate="visible"
-          className="text-xl md:text-2xl font-elegant text-white/70 mb-12 max-w-2xl leading-relaxed"
+          className="text-lg md:text-xl font-elegant text-white/70 mb-6 max-w-2xl leading-relaxed"
         >
           Master the art of the quick draw, chase down outlaws, and track your prey
           in AI-driven scenarios designed to forge legendary bounty hunters.
@@ -137,12 +137,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining, onShowLeader
           variants={buttonVariants}
           initial="hidden"
           animate="visible"
+          className="mb-6"
         >
           <Button
             variant="western"
             size="xl"
             onClick={onStartTraining}
-            className="text-2xl px-12 py-6 shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300"
+            className="text-xl px-10 py-5 shadow-2xl hover:shadow-3xl transform hover:scale-110 transition-all duration-300"
           >
             🔫 START TRAINING
           </Button>
@@ -152,40 +153,40 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining, onShowLeader
               variant="saloon"
               size="lg"
               onClick={onShowLeaderboard}
-              className="text-lg px-8 py-4 mt-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+              className="text-lg px-8 py-4 mx-7 mt-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
             >
               🏆 VIEW LEADERBOARD
             </Button>
           )}
         </motion.div>
 
-        {/* Features Preview */}
+        {/* Features Preview - Compact */}
         <motion.div
-          className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl"
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.5 }}
         >
-          <div className="text-center p-6 glass">
-            <div className="text-4xl mb-4">⚡</div>
-            <h3 className="text-lg font-western text-white mb-2">Lightning Fast Duels</h3>
-            <p className="text-white/70 font-elegant text-sm">
+          <div className="text-center p-4 glass">
+            <div className="text-2xl mb-2">⚡</div>
+            <h3 className="text-sm font-western text-white mb-1">Lightning Fast Duels</h3>
+            <p className="text-white/70 font-elegant text-xs">
               Test your reflexes in high-noon showdowns
             </p>
           </div>
 
-          <div className="text-center p-6 glass">
-            <div className="text-4xl mb-4">🐎</div>
-            <h3 className="text-lg font-western text-white mb-2">Thrilling Chases</h3>
-            <p className="text-white/70 font-elegant text-sm">
+          <div className="text-center p-4 glass">
+            <div className="text-2xl mb-2">🐎</div>
+            <h3 className="text-sm font-western text-white mb-1">Thrilling Chases</h3>
+            <p className="text-white/70 font-elegant text-xs">
               Pursue outlaws across the frontier
             </p>
           </div>
 
-          <div className="text-center p-6 glass">
-            <div className="text-4xl mb-4">🎯</div>
-            <h3 className="text-lg font-western text-white mb-2">Precise Tracking</h3>
-            <p className="text-white/70 font-elegant text-sm">
+          <div className="text-center p-4 glass">
+            <div className="text-2xl mb-2">🎯</div>
+            <h3 className="text-sm font-western text-white mb-1">Precise Tracking</h3>
+            <p className="text-white/70 font-elegant text-xs">
               Hunt down targets with stealth and skill
             </p>
           </div>
