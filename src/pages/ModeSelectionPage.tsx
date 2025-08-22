@@ -26,10 +26,10 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
     {
       mode: 'chase',
       title: 'Outlaw Chase',
-      description: 'Pursue dangerous criminals across the frontier. Use strategy and quick thinking to corner your targets.',
-      icon: '🐎',
+      description: 'Survive waves of bounty hunters in an intense shootout. Use strategy, accuracy, and quick reflexes to escape the law.',
+      icon: '🏃‍♂️',
       color: 'from-orange-600 to-orange-800',
-      unlocked: true, // Unlocked for testing
+      unlocked: true,
     },
     {
       mode: 'tracking',

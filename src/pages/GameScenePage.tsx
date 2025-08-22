@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import GameCanvas from '../components/game/GameCanvas';
 import HUD from '../components/game/HUD';
 import TrackingGame from '../components/game2/TrackingGame';
-import ChaseGame from '../components/game2/ChaseGame';
+import OutlawChaseGame from '../components/game3/OutlawChaseGame';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import { useGame } from '../hooks/useGame';
@@ -120,27 +120,28 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
       {
         id: 'outlaw-pursuit',
         mode: 'chase',
-        description: 'Coming soon: Chase down notorious outlaws across the dusty frontier.',
-        difficulty: 'Medium',
+        description: 'You\'re surrounded by bounty hunters closing in from all sides. Use cover, manage your ammo, and survive wave after wave of determined lawmen who want you dead or alive.',
+        difficulty: 'Hard',
         environment: {
-          name: 'Desert Plains',
-          background: 'desert',
+          name: 'Bounty Hunter Ambush',
+          background: 'desert-rocks',
           ambientSound: 'chase-ambient',
-          weather: 'Clear',
+          weather: 'Dusty',
           timeOfDay: 'Dusk',
         },
         aiOpponent: {
-          name: 'Wanted Outlaw',
+          name: 'Bounty Hunter Gang',
           skill: 0.8,
-          personality: 'Desperate and cunning',
+          personality: 'Relentless and coordinated',
           reactionTime: 320,
           accuracy: 0.8,
-          aggressiveness: 0.7,
+          aggressiveness: 0.9,
         },
         objectives: [
-          'Chase down the outlaw',
-          'Use strategy to corner your target',
-          'Bring them to justice',
+          'Survive waves of bounty hunters',
+          'Use obstacles for cover',
+          'Maintain accuracy under pressure',
+          'Escape or eliminate all threats',
         ],
       },
     ];
@@ -339,7 +340,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
               {mode.mode === 'tracking' ? (
                 <TrackingGame />
               ) : mode.mode === 'chase' ? (
-                <ChaseGame />
+                <OutlawChaseGame />
               ) : (
                 <GameCanvas
                   mode={mode.mode}
@@ -349,8 +350,8 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
           )}
         </AnimatePresence>
 
-        {/* HUD Overlay - Only show for non-tracking games */}
-        {gameState.isPlaying && mode.mode !== 'tracking' && <HUD />}
+        {/* HUD Overlay - Only show for non-tracking and non-chase games */}
+        {gameState.isPlaying && mode.mode !== 'tracking' && mode.mode !== 'chase' && <HUD />}
 
         {/* Pause Button */}
         {gameState.isPlaying && !gameState.isPaused && (
