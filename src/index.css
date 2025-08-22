@@ -1,1 +1,471 @@
 @import "tailwindcss";
+
+/* Tailwind v4 theme tokens */
+@theme {
+  /* Colors */
+  --color-wild-west-50: #fefaf5;
+  --color-wild-west-100: #fdf4e6;
+  --color-wild-west-200: #fae6c7;
+  --color-wild-west-300: #f6d19e;
+  --color-wild-west-400: #f0b473;
+  --color-wild-west-500: #e89550;
+  --color-wild-west-600: #d97a3e;
+  --color-wild-west-700: #b45f34;
+  --color-wild-west-800: #914e32;
+  --color-wild-west-900: #76422c;
+  --color-wild-west-950: #402217;
+
+  --color-desert-50: #fdf8f0;
+  --color-desert-100: #fbf0db;
+  --color-desert-200: #f7dfb7;
+  --color-desert-300: #f0c788;
+  --color-desert-400: #e8a957;
+  --color-desert-500: #e29334;
+  --color-desert-600: #d37f29;
+  --color-desert-700: #af6624;
+  --color-desert-800: #8c5325;
+  --color-desert-900: #724621;
+  --color-desert-950: #3e2310;
+
+  --color-saloon-50: #f7f3f0;
+  --color-saloon-100: #ede4dc;
+  --color-saloon-200: #dcc8b9;
+  --color-saloon-300: #c6a691;
+  --color-saloon-400: #b28670;
+  --color-saloon-500: #a1735a;
+  --color-saloon-600: #94654f;
+  --color-saloon-700: #7a5443;
+  --color-saloon-800: #64463a;
+  --color-saloon-900: #523b31;
+  --color-saloon-950: #2b1e19;
+
+  /* Fonts */
+  --font-western: Rye, serif;
+  --font-elegant: Cinzel, serif;
+  --font-spooky: Creepster, cursive;
+  --font-pirate: "Pirata One", cursive;
+
+  /* Shadows */
+  --shadow-western: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(212, 122, 62, 0.04);
+  --shadow-saloon: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(161, 115, 90, 0.04);
+}
+
+/* Custom Wild West Styles */
+:root {
+  /* Wild West Color Palette */
+  --wild-west-50: #fefaf5;
+  --wild-west-100: #fdf4e6;
+  --wild-west-200: #fae6c7;
+  --wild-west-300: #f6d19e;
+  --wild-west-400: #f0b473;
+  --wild-west-500: #e89550;
+  --wild-west-600: #d97a3e;
+  --wild-west-700: #b45f34;
+  --wild-west-800: #914e32;
+  --wild-west-900: #76422c;
+  --wild-west-950: #402217;
+
+  /* Desert Color Palette */
+  --desert-50: #fdf8f0;
+  --desert-100: #fbf0db;
+  --desert-200: #f7dfb7;
+  --desert-300: #f0c788;
+  --desert-400: #e8a957;
+  --desert-500: #e29334;
+  --desert-600: #d37f29;
+  --desert-700: #af6624;
+  --desert-800: #8c5325;
+  --desert-900: #724621;
+  --desert-950: #3e2310;
+
+  /* Saloon Color Palette */
+  --saloon-50: #f7f3f0;
+  --saloon-100: #ede4dc;
+  --saloon-200: #dcc8b9;
+  --saloon-300: #c6a691;
+  --saloon-400: #b28670;
+  --saloon-500: #a1735a;
+  --saloon-600: #94654f;
+  --saloon-700: #7a5443;
+  --saloon-800: #64463a;
+  --saloon-900: #523b31;
+  --saloon-950: #2b1e19;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Modern glass utility */
+.glass {
+  @apply bg-white/5 dark:bg-white/5 backdrop-blur-md ring-1 ring-white/10 border border-white/10 rounded-xl shadow-2xl;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: 'Cinzel', serif;
+  background: linear-gradient(135deg, var(--wild-west-900) 0%, var(--wild-west-800) 25%, var(--wild-west-700) 50%, var(--wild-west-600) 75%, var(--wild-west-500) 100%);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Western Button Styles */
+.btn-western { /* fallback custom button for 'western' variant */
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(to right, var(--wild-west-600), var(--wild-west-700));
+  color: white;
+  font-family: 'Rye', serif;
+  font-size: 1.125rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-western);
+  border: 1px solid var(--wild-west-800);
+  transform: translateZ(0);
+  transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
+  cursor: pointer;
+}
+
+.btn-western:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.btn-western:active { transform: translateY(0); filter: brightness(0.98); }
+
+.btn-saloon {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(to right, var(--saloon-600), var(--saloon-700));
+  color: white;
+  font-family: 'Cinzel', serif;
+  border-radius: 0.375rem;
+  box-shadow: var(--shadow-saloon);
+  border: 1px solid var(--saloon-800);
+  transform: scale(1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-saloon:hover {
+  transform: scale(1.05);
+}
+
+.btn-saloon:active {
+  transform: scale(0.95);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, var(--wild-west-900), var(--saloon-900));
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--wild-west-600), var(--wild-west-700));
+  border-radius: 6px;
+  border: 2px solid var(--wild-west-900);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--wild-west-500), var(--wild-west-600));
+}
+
+/* Text glow effect */
+.text-glow {
+  text-shadow: 0 0 10px rgba(232, 149, 80, 0.5), 0 0 20px rgba(232, 149, 80, 0.3), 0 0 30px rgba(232, 149, 80, 0.1);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+:root {
+  /* Red & Black Theme */
+  --bg-black: #0a0a0a;
+  --bg-deep: #0f0f10;
+  --bg-elev: #161618;
+  --text-primary: #f6f6f6;
+  --text-secondary: #d1d1d1;
+
+  --red-50: #fff1f2;
+  --red-100: #ffe4e6;
+  --red-200: #fecdd3;
+  --red-300: #fda4af;
+  --red-400: #fb7185;
+  --red-500: #ef4444; /* vivid */
+  --red-600: #dc2626; /* brand */
+  --red-700: #b91c1c;
+  --red-800: #991b1b;
+  --red-900: #7f1d1d;
+
+  --accent: var(--red-600);
+  --accent-2: var(--red-500);
+  --accent-dark: var(--red-800);
+
+  /* Shadows & borders */
+  --shadow-xl: 0 25px 50px -12px rgba(0,0,0,0.65);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.45);
+  --ring: 0 0 0 2px rgba(220, 38, 38, 0.35);
+}
+  transform: translateY(-8px) rotateX(10deg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Western border styles */
+.border-western {
+/* Layered red/black background with subtle textures */
+body {
+  font-family: 'Cinzel', serif;
+  color: var(--text-primary);
+  background:
+    radial-gradient(60% 40% at 50% 0%, rgba(220,38,38,0.15), transparent 60%),
+    radial-gradient(50% 30% at 80% 20%, rgba(185,28,28,0.12), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.75) 100%),
+    url('/public/noise.svg'),
+    linear-gradient(135deg, #0b0b0c 0%, #111113 30%, #0e0e10 60%, #0b0b0c 100%);
+  background-size: cover, cover, 100% 100%, 300px 300px, 100% 100%;
+  background-attachment: fixed, fixed, fixed, fixed, fixed;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Decorative vignette and grid overlays */
+.bg-vignette::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(80% 60% at 50% 30%, transparent 60%, rgba(0,0,0,0.6) 100%);
+  z-index: 0;
+}
+
+.bg-grid::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px, 40px 40px;
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-lg);
+}
+
+.glass-strong {
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-xl);
+}
+  border: 3px solid;
+  border-image: linear-gradient(45deg, var(--wild-west-600), var(--wild-west-700), var(--wild-west-800)) 1;
+}
+
+/* Dust particle animation */
+.dust-particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(232, 149, 80, 0.6);
+  border-radius: 50%;
+  animation: dust 3s linear infinite;
+}
+.btn-western {
+  padding: 0.8rem 1.25rem;
+  background: linear-gradient(90deg, var(--red-700), var(--red-600));
+  color: white;
+  font-family: 'Rye', serif;
+  font-size: 1.05rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--red-800);
+  transform: translateZ(0);
+  transition: transform 160ms ease, box-shadow 200ms ease, filter 200ms ease;
+  box-shadow: 0 10px 20px rgba(239, 68, 68, 0.15);
+  cursor: pointer;
+}
+
+.btn-western:hover { transform: translateY(-2px); filter: brightness(1.03); }
+.btn-western:active { transform: translateY(0); filter: brightness(0.98); }
+
+@keyframes dust {
+  0% { transform: translateX(-10px); opacity: 0.6; }
+  50% { transform: translateX(10px); opacity: 0.3; }
+  100% { transform: translateX(-10px); opacity: 0.6; }
+}
+
+/* Loading spinner */
+.spinner-western {
+  border: 4px solid rgba(232, 149, 80, 0.2);
+  border-top: 4px solid var(--wild-west-500);
+  border-radius: 50%;
+.btn-saloon {
+  padding: 0.7rem 1rem;
+  background: linear-gradient(90deg, #141415, #1b1b1e);
+  color: var(--text-primary);
+  font-family: 'Cinzel', serif;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+  transition: transform 160ms ease, box-shadow 200ms ease, filter 200ms ease;
+}
+.btn-saloon:hover { transform: translateY(-2px); }
+.btn-saloon:active { transform: translateY(0); }
+  animation: spin 1s linear infinite;
+}
+::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, #111113, #0a0a0a);
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--red-700), var(--red-600));
+  100% { transform: rotate(360deg); }
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--red-600), var(--red-500));
+/* Game canvas styles */
+.game-canvas {
+  border: 4px solid var(--wild-west-700);
+  border-radius: 8px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+.border-western {
+  border: 1px solid transparent;
+  background: linear-gradient(#141415, #141415) padding-box,
+              linear-gradient(45deg, var(--red-800), var(--red-600), var(--red-800)) border-box;
+  border-radius: 0.75rem;
+}
+}
+
+.game-canvas {
+  border: 2px solid var(--red-800);
+/* HUD overlay styles */
+.hud-overlay {
+  background: linear-gradient(135deg, rgba(118, 66, 44, 0.9), rgba(145, 78, 50, 0.8));
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(232, 149, 80, 0.3);
+.progress-bar {
+  background: linear-gradient(90deg, var(--red-700), var(--red-500));
+}
+
+/* Progress bar styles */
+.progress-bar {
+  background: linear-gradient(90deg, var(--wild-west-600), var(--wild-west-500));
+  border-radius: 10px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Modal backdrop */
+.modal-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+}
+
+/* Western input styles */
+.input-western {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(to right, var(--saloon-100), var(--wild-west-100));
+  border: 2px solid var(--wild-west-400);
+  border-radius: 0.5rem;
+  font-family: 'Cinzel', serif;
+  color: var(--wild-west-900);
+  transition: all 0.2s ease;
+}
+
+.input-western::placeholder {
+  color: var(--wild-west-600);
+}
+
+.input-western:focus {
+  outline: none;
+  border-color: var(--wild-west-600);
+  box-shadow: 0 0 0 2px rgba(232, 149, 80, 0.3);
+}
+
+/* Tooltip styles */
+.tooltip {
+  position: absolute;
+  z-index: 50;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  background: linear-gradient(to right, var(--saloon-800), var(--wild-west-800));
+  color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--wild-west-600);
+}
+
+/* Animation keyframes */
+@keyframes draw {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes smoke {
+  0% { transform: translateY(0) scale(1); opacity: 0.8; }
+  100% { transform: translateY(-20px) scale(1.5); opacity: 0; }
+}
+
+@keyframes parallax {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Utility animation classes */
+.animate-draw {
+  animation: draw 0.3s ease-in-out;
+}
+
+.animate-smoke {
+  animation: smoke 2s ease-in-out infinite;
+}
+
+.animate-dust {
+  animation: dust 1s ease-in-out infinite;
+}
+
+.animate-parallax-slow {
+  animation: parallax 20s linear infinite;
+}
+
+.animate-parallax-fast {
+  animation: parallax 10s linear infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce 3s ease-in-out infinite;
+}
+
+/* Font families */
+.font-western {
+  font-family: 'Rye', serif;
+}
+
+.font-elegant {
+  font-family: 'Cinzel', serif;
+}
+
+.font-spooky {
+  font-family: 'Creepster', cursive;
+}
+
+.font-pirate {
+  font-family: 'Pirata One', cursive;
+}
