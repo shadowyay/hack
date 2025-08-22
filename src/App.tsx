@@ -4,6 +4,7 @@ import LandingPage from './pages/LandingPage';
 import ModeSelectionPage from './pages/ModeSelectionPage';
 import GameScenePage from './pages/GameScenePage';
 import ResultsPage from './pages/ResultsPage';
+import apiConfig from './utils/apiConfig';
 import AuthPage from './pages/AuthPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import type { GameModeConfig, GameResult } from './types';
@@ -116,7 +117,7 @@ const App: React.FC = () => {
       const token = localStorage.getItem('token');
       if (!token) return;
 
-      await fetch('http://localhost:3001/performance/save-result', {
+      await fetch(apiConfig.performance.saveResult, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import type { GameMode } from '../../types';
+import apiConfig from '../../utils/apiConfig';
 
 interface LeaderboardEntry {
   rank: number;
@@ -83,9 +84,7 @@ const Leaderboard: React.FC<LeaderboardProps> = React.memo(({
         setLoading(true);
         setError('');
         console.log('Fetching leaderboard for mode:', gameMode);
-        const endpoint = gameMode 
-          ? `http://localhost:3001/leaderboard/${gameMode}?limit=${limit}`
-          : `http://localhost:3001/leaderboard?limit=${limit}`;
+        const endpoint = apiConfig.leaderboard.get(gameMode, limit);
         
         const response = await fetch(endpoint);
         const data = await response.json();
@@ -133,9 +132,7 @@ const Leaderboard: React.FC<LeaderboardProps> = React.memo(({
       
       try {
         console.log('Fetching user rank for:', userId, gameMode);
-        const endpoint = gameMode 
-          ? `http://localhost:3001/leaderboard/user/${userId}/${gameMode}`
-          : `http://localhost:3001/leaderboard/user/${userId}`;
+        const endpoint = apiConfig.leaderboard.user(userId, gameMode);
         
         const response = await fetch(endpoint);
         const data = await response.json();
@@ -169,9 +166,7 @@ const Leaderboard: React.FC<LeaderboardProps> = React.memo(({
       localStorage.removeItem(cacheKey);
       
       console.log('Manual refresh for mode:', gameMode);
-      const endpoint = gameMode 
-        ? `http://localhost:3001/leaderboard/${gameMode}?limit=${limit}`
-        : `http://localhost:3001/leaderboard?limit=${limit}`;
+      const endpoint = apiConfig.leaderboard.get(gameMode, limit);
       
       const response = await fetch(endpoint);
       const data = await response.json();

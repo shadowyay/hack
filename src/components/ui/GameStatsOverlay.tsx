@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Leaderboard from './Leaderboard';
 import type { GameMode } from '../../types';
+import apiConfig from '../../utils/apiConfig';
 
 interface GameStatsOverlayProps {
   gameMode: GameMode;
@@ -141,7 +142,7 @@ const PersonalStats: React.FC<PersonalStatsProps> = ({ gameMode, userId }) => {
     
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3001/auth/profile', {
+      const response = await fetch(apiConfig.auth.profile, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
