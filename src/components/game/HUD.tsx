@@ -3,7 +3,11 @@ import { motion } from 'framer-motion';
 import { useGame } from '../../hooks/useGame';
 import { formatTime } from '../../utils';
 
-const HUD: React.FC = () => {
+interface HUDProps {
+  onShowStats?: () => void;
+}
+
+const HUD: React.FC<HUDProps> = ({ onShowStats }) => {
   const { gameState, updateGameState } = useGame();
 
   useEffect(() => {
@@ -128,6 +132,16 @@ const HUD: React.FC = () => {
               >
                 🎯 Hot Streak!
               </motion.div>
+            )}
+
+            {/* Stats Button */}
+            {onShowStats && (
+              <button
+                onClick={onShowStats}
+                className="bg-wild-west-600/80 hover:bg-wild-west-500/80 text-white px-3 py-1 rounded-lg text-sm font-elegant transition-all duration-200 mt-2"
+              >
+                📊 Stats
+              </button>
             )}
           </div>
         </div>

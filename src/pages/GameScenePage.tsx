@@ -7,6 +7,7 @@ import TrackingGame from '../components/game2/TrackingGame';
 import OutlawChaseGame from '../components/game3/OutlawChaseGame';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
+import GameStatsOverlay from '../components/ui/GameStatsOverlay';
 import { useGame } from '../hooks/useGame';
 import { useTimer } from '../hooks/useTimer';
 import type { GameModeConfig, GameScenario } from '../types';
@@ -27,7 +28,12 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
   const { startTimer, pauseTimer, resumeTimer } = useTimer();
   const [showPauseMenu, setShowPauseMenu] = useState(false);
   const [showScenarioIntro, setShowScenarioIntro] = useState(true);
+  const [showStatsOverlay, setShowStatsOverlay] = useState(false);
   const [currentScenario, setCurrentScenario] = useState<GameScenario | null>(null);
+
+  // Get user data for leaderboard
+  const userData = localStorage.getItem('user');
+  const user = userData ? JSON.parse(userData) : null;
 
   // Generate scenario on mount
   useEffect(() => {
@@ -309,6 +315,18 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
             </Button>
             
             <Button
+              variant="saloon"
+              size="lg"
+              onClick={() => {
+                setShowStatsOverlay(true);
+                setShowPauseMenu(false);
+              }}
+              className="button-modern w-full"
+            >
+              📊 View Stats & Leaderboard
+            </Button>
+            
+            <Button
               variant="secondary"
               size="lg"
               onClick={handleQuitGame}
@@ -351,7 +369,9 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
         </AnimatePresence>
 
         {/* HUD Overlay - Only show for non-tracking and non-chase games */}
-        {gameState.isPlaying && mode.mode !== 'tracking' && mode.mode !== 'chase' && <HUD />}
+        {gameState.isPlaying && mode.mode !== 'tracking' && mode.mode !== 'chase' && (
+          <HUD onShowStats={() => setShowStatsOverlay(true)} />
+        )}
 
         {/* Pause Button */}
         {gameState.isPlaying && !gameState.isPaused && (
@@ -396,6 +416,15 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
           </motion.div>
         )}
       </div>
+
+      {/* Stats Overlay */}
+      <GameStatsOverlay
+        gameMode={mode.mode}
+        userId={user?.id}
+        currentScore={gameState.stats.score}
+        isVisible={showStatsOverlay}
+        onClose={() => setShowStatsOverlay(false)}
+      />
     </div>
   );
 };

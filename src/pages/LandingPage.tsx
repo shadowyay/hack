@@ -4,9 +4,10 @@ import Button from '../components/ui/Button';
 
 interface LandingPageProps {
   onStartTraining: () => void;
+  onShowLeaderboard?: () => void;
 }
 
-const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining, onShowLeaderboard }) => {
   const titleVariants = {
     hidden: { opacity: 0, y: -50 },
     visible: {
@@ -145,6 +146,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining }) => {
           >
             🔫 START TRAINING
           </Button>
+
+          {onShowLeaderboard && (
+            <Button
+              variant="saloon"
+              size="lg"
+              onClick={onShowLeaderboard}
+              className="text-lg px-8 py-4 mt-4 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+            >
+              🏆 VIEW LEADERBOARD
+            </Button>
+          )}
         </motion.div>
 
         {/* Features Preview */}

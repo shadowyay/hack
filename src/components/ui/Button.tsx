@@ -10,6 +10,7 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   children,
   className = '',
+  type = 'button',
 }) => {
   const baseClasses = 'font-semibold rounded-xl transition-all duration-200 transform focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
   
@@ -38,6 +39,7 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <motion.button
+      type={type}
       className={classes}
       onClick={handleClick}
       disabled={disabled || loading}

@@ -9,6 +9,7 @@ const scenarioRoutes = require('./routes/scenario');
 const performanceRoutes = require('./routes/performance');
 const feedbackRoutes = require('./routes/feedback');
 const leaderboardRoutes = require('./routes/leaderboard');
+const authRoutes = require('./routes/auth');
 
 const app = express();
 const server = http.createServer(app);
@@ -19,11 +20,13 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected'))
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/bounty_hunters_db';
+mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected to:', MONGO_URI))
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Routes
+app.use('/auth', authRoutes);
 app.use('/scenario', scenarioRoutes);
 app.use('/performance', performanceRoutes);
 app.use('/feedback', feedbackRoutes);
@@ -32,7 +35,7 @@ app.use('/leaderboard', leaderboardRoutes);
 // WebSocket logic
 require('./services/socketService')(io);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3001;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

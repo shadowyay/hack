@@ -3,6 +3,8 @@ export { default as Button } from './ui/Button';
 export { default as Card } from './ui/Card';
 export { default as Modal } from './ui/Modal';
 export { default as Tooltip } from './ui/Tooltip';
+export { default as Leaderboard } from './ui/Leaderboard';
+export { default as GameStatsOverlay } from './ui/GameStatsOverlay';
 
 // Game Components
 export { default as HUD } from './game/HUD';

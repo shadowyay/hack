@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
+import Leaderboard from '../components/ui/Leaderboard';
 import { formatTime, calculateScore } from '../utils';
 import type { GameResult } from '../types';
 
@@ -314,6 +315,25 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
           >
             🏠 Main Menu
           </Button>
+        </motion.div>
+
+        {/* Leaderboard */}
+        <motion.div
+          className="mt-12 max-w-4xl mx-auto"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 1.0 }}
+        >
+          <Leaderboard
+            gameMode={result.mode}
+            limit={5}
+            showUserRank={true}
+            userId={(() => {
+              const userData = localStorage.getItem('user');
+              return userData ? JSON.parse(userData).id : null;
+            })()}
+            className="mx-auto"
+          />
         </motion.div>
 
         {/* Additional Stats */}

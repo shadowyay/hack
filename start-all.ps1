@@ -9,7 +9,7 @@ Start-Process powershell -ArgumentList "-NoExit", "-Command", "npm run dev"
 Start-Sleep -Seconds 2
 
 Write-Host "🖥️ Starting Backend (src/backend)..." -ForegroundColor Green  
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd src/backend; node server.js"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd src/backend; node app.js"
 
 Start-Sleep -Seconds 2
 
@@ -20,7 +20,7 @@ Write-Host ""
 Write-Host "✅ All servers starting in separate windows!" -ForegroundColor Yellow
 Write-Host "🎯 Game will be ready at: http://localhost:5173" -ForegroundColor Cyan
 Write-Host "🤖 AI Service at: http://localhost:5001" -ForegroundColor Cyan  
-Write-Host "🖥️ Backend at: http://localhost:5000" -ForegroundColor Cyan
+Write-Host "🖥️ Backend at: http://localhost:3001" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Press any key to exit..." -ForegroundColor White
 Read-Host

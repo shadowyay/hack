@@ -8,7 +8,7 @@ start "Frontend" cmd /k "npm run dev"
 timeout /t 2 /nobreak >nul
 
 echo 🖥️ Starting Backend...
-start "Backend" cmd /k "cd src/backend && node server.js"
+start "Backend" cmd /k "cd src/backend && node app.js"
 
 timeout /t 2 /nobreak >nul
 
@@ -19,7 +19,7 @@ echo.
 echo ✅ All servers starting in separate windows!
 echo 🎯 Game will be ready at: http://localhost:5173
 echo 🤖 AI Service at: http://localhost:5001
-echo 🖥️ Backend at: http://localhost:5000
+echo 🖥️ Backend at: http://localhost:3001
 echo.
 echo Press any key to exit...
 pause >nul
