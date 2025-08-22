@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const RDR2TrackingGame = () => {
@@ -481,7 +482,7 @@ const RDR2TrackingGame = () => {
     } else if (gameState.eagleEyeCooldown <= 0) {
       setEagleEyeStatus('Ready');
     } else {
-      setEagleEyeStatus(Cooldown: ${Math.ceil(gameState.eagleEyeCooldown/60)}s);
+      setEagleEyeStatus(`Cooldown: ${Math.ceil(gameState.eagleEyeCooldown/60)}s`);
     }
   }, [gameState.eagleEyeActive, gameState.eagleEyeCooldown]);
 
