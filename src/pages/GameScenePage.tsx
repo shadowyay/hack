@@ -218,8 +218,26 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
     );
   }
 
+  // Choose background image based on mode
+  let backgroundImage = "https://theindianwire.com/wp-content/uploads/2019/12/red-dead-2-phone-wallpaper-1-scaled.jpg";
+  if (mode.mode === 'duel') {
+    backgroundImage = "https://i.pinimg.com/originals/04/9f/23/049f234597892fd8e4cc569c884a2504.jpg";
+  } else if (mode.mode === 'chase') {
+    backgroundImage = "https://images.hdqwalls.com/wallpapers/arthur-morgan-red-dead-redemption-2-hy.jpg";
+  } else if (mode.mode === 'tracking') {
+    backgroundImage = "https://www.gtabase.com/igallery/2301-2400/RDR2_HandsOnPreviews_24_JavierEscuella-2366-1080.jpg";
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-950 to-zinc-900 relative overflow-y-auto">
+    <div
+      className="min-h-screen relative overflow-y-auto"
+      style={{
+        backgroundImage: `url('${backgroundImage}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       {/* Scenario Introduction Modal */}
       <Modal
         isOpen={showScenarioIntro}

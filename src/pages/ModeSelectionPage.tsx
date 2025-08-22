@@ -68,7 +68,15 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-stone-900 to-zinc-900 relative overflow-y-auto">
+    <div
+      className="min-h-screen relative overflow-y-auto"
+      style={{
+        backgroundImage: `url('https://theindianwire.com/wp-content/uploads/2019/12/red-dead-2-phone-wallpaper-1-scaled.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
       {/* Background decorations */}
       <div className="absolute inset-0 bg-western-pattern opacity-5" />
       
