@@ -120,13 +120,19 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
     }
   };
 
-  const handleGameEnd = (result: { score: number; accuracy: number; reactionTime: number; strategyRating: number }) => {
-    onGameEnd(result);
-  };
-
-  const handleQuitGame = () => {
+  const handleQuitGame = useCallback(() => {
     onGoBack();
-  };
+  }, [onGoBack]);
+
+  // Listen for game end events from the Phaser game
+  useEffect(() => {
+    const handleGameEndEvent = (event: CustomEvent) => {
+      onGameEnd(event.detail);
+    };
+
+    window.addEventListener('GAME_END', handleGameEndEvent as EventListener);
+    return () => window.removeEventListener('GAME_END', handleGameEndEvent as EventListener);
+  }, [onGameEnd]);
 
   if (!currentScenario) {
     return (
@@ -262,7 +268,6 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
             >
               <GameCanvas
                 mode={mode.mode}
-                onGameEnd={handleGameEnd}
               />
             </motion.div>
           )}

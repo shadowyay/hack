@@ -1,10 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '../../hooks/useGame';
 import { formatTime } from '../../utils';
 
 const HUD: React.FC = () => {
-  const { gameState } = useGame();
+  const { gameState, updateGameState } = useGame();
+
+  useEffect(() => {
+    const handler = (e: CustomEvent) => {
+      updateGameState({ stats: e.detail });
+    };
+    
+    window.addEventListener('GAME_STATS', handler as EventListener);
+    return () => window.removeEventListener('GAME_STATS', handler as EventListener);
+  }, [updateGameState]);
   const { stats, timer } = gameState;
 
   const hudVariants = {
@@ -51,7 +60,7 @@ const HUD: React.FC = () => {
             <div className="flex items-center space-x-3">
               <span className="text-white font-elegant text-sm w-16">Ammo</span>
               <div className="flex space-x-1">
-                {Array.from({ length: 6 }).map((_, index) => (
+                {Array.from({ length: 10 }).map((_, index) => (
                   <motion.div
                     key={index}
                     className={`w-3 h-6 rounded-sm ${
@@ -66,7 +75,7 @@ const HUD: React.FC = () => {
                 ))}
               </div>
               <span className="text-white font-bold text-sm">
-                {stats.ammo}/6
+                {stats.ammo}/10
               </span>
             </div>
 
