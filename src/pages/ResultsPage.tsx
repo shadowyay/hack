@@ -91,7 +91,7 @@ const ResultsPage: React.FC<ResultsPageProps> = ({
   const showNextMode = onNextMode && isWin && result.score >= 80;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-wild-west-900 via-desert-800 to-saloon-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-wild-west-900 via-desert-800 to-saloon-900 relative">
       {/* Background effects */}
       <div className="absolute inset-0 bg-western-pattern opacity-5" />
       

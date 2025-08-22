@@ -66,7 +66,7 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-stone-900 to-zinc-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-950 via-stone-900 to-zinc-900 relative">
       {/* Background decorations */}
       <div className="absolute inset-0 bg-western-pattern opacity-5" />
       

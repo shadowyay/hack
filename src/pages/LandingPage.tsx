@@ -68,7 +68,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStartTraining }) => {
   ));
 
   return (
-  <div className="min-h-screen relative overflow-hidden bg-vignette bg-grid">
+  <div className="min-h-screen relative bg-vignette bg-grid">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-30">
         {dustParticles}

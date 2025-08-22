@@ -141,7 +141,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-950 to-zinc-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-neutral-950 to-zinc-900 relative">
       {/* Scenario Introduction Modal */}
       <Modal
         isOpen={showScenarioIntro}

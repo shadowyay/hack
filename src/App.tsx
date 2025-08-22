@@ -83,7 +83,7 @@ const App: React.FC = () => {
 
   return (
     <GameProvider>
-  <div className="App bg-vignette bg-grid min-h-screen">
+  <div className="App bg-vignette bg-grid min-h-screen overflow-y-auto">
         {currentState === 'landing' && (
           <LandingPage onStartTraining={handleStartTraining} />
         )}
