@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
+import { GameContext } from '../../context/GameContext';
 import Leaderboard from '../ui/Leaderboard';
 
 interface Enemy {
@@ -51,6 +52,8 @@ interface GameStats {
 
 const OutlawChaseGame = () => {
   const [gameState, setGameState] = useState('menu'); // menu, playing, paused, gameOver, victory, analysis
+  const gameContext = useContext(GameContext);
+  const isPaused = gameContext?.gameState?.isPaused;
   const [player, setPlayer] = useState({
     x: 100,
     y: 300,
@@ -211,25 +214,25 @@ const OutlawChaseGame = () => {
   
   // Game loop
   useEffect(() => {
-    if (gameState !== 'playing') return;
-    
-  const gameLoop = setInterval(() => {
+    if (gameState !== 'playing' || isPaused) return;
+
+    const gameLoop = setInterval(() => {
       setGameTime(prev => prev + 1);
-      
+
       // Move player
       setPlayer(prev => {
         let newX = prev.x;
         let newY = prev.y;
-        
+
         if (keys['a'] || keys['arrowleft']) newX -= prev.speed;
         if (keys['d'] || keys['arrowright']) newX += prev.speed;
         if (keys['w'] || keys['arrowup']) newY -= prev.speed;
         if (keys['s'] || keys['arrowdown']) newY += prev.speed;
-        
+
         // Boundary check
-  newX = Math.max(0, Math.min(viewport.width - 30, newX));
-  newY = Math.max(0, Math.min(viewport.height - 30, newY));
-        
+        newX = Math.max(0, Math.min(viewport.width - 30, newX));
+        newY = Math.max(0, Math.min(viewport.height - 30, newY));
+
         // Obstacle collision
         let collided = false;
         obstacles.forEach(obstacle => {
