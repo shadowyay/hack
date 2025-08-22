@@ -29,15 +29,16 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
       description: 'Pursue dangerous criminals across the frontier. Use strategy and quick thinking to corner your targets.',
       icon: '🐎',
       color: 'from-orange-600 to-orange-800',
-      unlocked: false, // Will be unlocked after completing duel mode
+      unlocked: true, // Unlocked for testing
     },
     {
       mode: 'tracking',
-      title: 'Bounty Tracking',
-      description: 'Hunt down elusive targets using stealth and cunning. Read the signs and follow the trail to your quarry.',
-      icon: '🎯',
+      title: 'Animal Tracking',
+      description: 'Track wild animals across the frontier. Use Eagle Eye to spot tracks and hunt dangerous beasts in the wilderness.',
+      icon: '🦌',
       color: 'from-green-600 to-green-800',
-      unlocked: false, // Will be unlocked after completing chase mode
+      unlocked: true, // Unlocked - this will be the RDR2 tracking game
+      bestScore: 1250,
     },
   ];
 

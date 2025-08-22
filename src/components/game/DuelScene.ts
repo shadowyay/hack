@@ -13,12 +13,17 @@ export default class DuelScene extends Phaser.Scene {
   // Private state
   private player!: Phaser.Physics.Arcade.Sprite;
   private opponent!: Phaser.Physics.Arcade.Sprite;
+  private playerVis!: Phaser.GameObjects.Rectangle;
+  private botVis!: Phaser.GameObjects.Rectangle;
   private bullets!: Phaser.Physics.Arcade.Group;
   private aiBullets!: Phaser.Physics.Arcade.Group;
   private obstacles!: Phaser.Physics.Arcade.StaticGroup;
+  private groundPlatform!: Phaser.GameObjects.Rectangle;
   private puff!: Phaser.GameObjects.Particles.ParticleEmitter;
   private wasdKeys!: { [key: string]: Phaser.Input.Keyboard.Key };
   private shootKey!: Phaser.Input.Keyboard.Key;
+  private playerLabel!: Phaser.GameObjects.Text;
+  private botLabel!: Phaser.GameObjects.Text;
 
   // Gameplay
   private shots = 0;
@@ -30,6 +35,9 @@ export default class DuelScene extends Phaser.Scene {
   private score = 0;
   private gameEnded = false;
 
+  // Ground level for consistent spawning
+  private groundLevel!: number;
+
   preload() {
     // Generate simple 1x1 pixel for particles and bullets
     this.textures.generate('pixel', { data: ['1'], pixelWidth: 1 });
@@ -37,92 +45,123 @@ export default class DuelScene extends Phaser.Scene {
 
   create() {
     const { width, height } = this.cameras.main;
+    
+    // Set ground level consistently
+    this.groundLevel = Math.floor(height * 0.6);
 
-  // 1) Background – RDR2-style desert
-  const sky = this.add.graphics();
+    // 1) Background – RDR2-style desert
+    const sky = this.add.graphics();
     sky.fillGradientStyle(0x87ceeb, 0x87ceeb, 0xffd700, 0xff4500, 1);
     sky.fillRect(0, 0, width, height * 0.6);
-  sky.setDepth(0);
+    sky.setDepth(0);
 
-  const ground = this.add.graphics();
+    const ground = this.add.graphics();
     ground.fillStyle(0x8b4513, 1);
-    ground.fillRect(0, height * 0.6, width, height * 0.4);
-  ground.setDepth(0);
+    ground.fillRect(0, this.groundLevel, width, height * 0.4);
+    ground.setDepth(0);
 
     // Procedural clouds
-  this.add.graphics()
+    this.add.graphics()
       .fillStyle(0xffffff, 0.6)
       .fillEllipse(width * 0.2, 80, 100, 50)
       .fillEllipse(width * 0.7, 60, 120, 60);
 
     // Mesa silhouettes in background
-  const mesa = this.add.graphics();
+    const mesa = this.add.graphics();
     mesa.fillStyle(0x654321, 0.8);
-    mesa.fillTriangle(width * 0.1, height * 0.6, width * 0.25, height * 0.4, width * 0.4, height * 0.6);
-    mesa.fillTriangle(width * 0.6, height * 0.6, width * 0.75, height * 0.35, width * 0.9, height * 0.6);
-  mesa.setDepth(0);
+    mesa.fillTriangle(width * 0.1, this.groundLevel, width * 0.25, this.groundLevel - 200, width * 0.4, this.groundLevel);
+    mesa.fillTriangle(width * 0.6, this.groundLevel, width * 0.75, this.groundLevel - 250, width * 0.9, this.groundLevel);
+    mesa.setDepth(0);
 
-    // 2) Ground platform
+    // 2) Ground platform - physics enabled
     this.physics.world.setBounds(0, 0, width, height);
-  const groundLevel = height - 40;
-  const groundPlatform = this.add.rectangle(0, groundLevel, width, 80, 0x704214).setOrigin(0);
-    this.physics.add.existing(groundPlatform, true);
-  groundPlatform.setDepth(1);
+    this.groundPlatform = this.add.rectangle(0, this.groundLevel, width, height - this.groundLevel, 0x704214).setOrigin(0);
+    this.physics.add.existing(this.groundPlatform, true);
+    (this.groundPlatform.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
+    this.groundPlatform.setDepth(1);
 
     // 3) Create obstacles (cover points and platforms) - attached to ground
-  this.obstacles = this.physics.add.staticGroup();
+    this.obstacles = this.physics.add.staticGroup();
     
     // Cover walls - smaller heights for jumping
-    const wall1 = this.add.rectangle(width * 0.25, groundLevel - 30, 20, 60, 0x654321);
-    const wall2 = this.add.rectangle(width * 0.5, groundLevel - 25, 30, 50, 0x654321);
-    const wall3 = this.add.rectangle(width * 0.75, groundLevel - 35, 25, 70, 0x654321);
+    const wall1 = this.add.rectangle(width * 0.25, this.groundLevel - 30, 20, 60, 0x654321);
+    const wall2 = this.add.rectangle(width * 0.5, this.groundLevel - 25, 30, 50, 0x654321);
+    const wall3 = this.add.rectangle(width * 0.75, this.groundLevel - 35, 25, 70, 0x654321);
     
     // Jumping platforms - lower heights
-    const platform1 = this.add.rectangle(width * 0.35, groundLevel - 80, 80, 20, 0x8b4513);
-    const platform2 = this.add.rectangle(width * 0.65, groundLevel - 70, 90, 20, 0x8b4513);
+    const platform1 = this.add.rectangle(width * 0.35, this.groundLevel - 80, 80, 20, 0x8b4513);
+    const platform2 = this.add.rectangle(width * 0.65, this.groundLevel - 70, 90, 20, 0x8b4513);
     
     this.obstacles.addMultiple([wall1, wall2, wall3, platform1, platform2]);
     
     // Add physics to obstacles
     this.obstacles.children.iterate((child) => {
-  const obstacle = child as unknown as Phaser.GameObjects.Rectangle;
+      const obstacle = child as Phaser.GameObjects.Rectangle;
       this.physics.add.existing(obstacle, true);
-  obstacle.setDepth(2);
+      (obstacle.body as Phaser.Physics.Arcade.StaticBody).updateFromGameObject();
+      obstacle.setDepth(2);
       return true;
     });
 
-  // 4) Player & AI sprites - positioned on ground
-  this.player = this.physics.add.sprite(100, groundLevel - 30, 'pixel')
+    // 4) Player & AI sprites - positioned on ground at SAME Y level
+    const MARGIN_X = 20;
+    const halfW = 15;
+    const playerSpawnX = MARGIN_X + halfW;
+    const botSpawnX = width - (MARGIN_X + halfW);
+    
+    // CRITICAL FIX: Both spawn at exactly the same Y coordinate
+    const spawnY = this.groundLevel - 30; // 30 pixels above ground for both
+
+    this.player = this.physics.add.sprite(playerSpawnX, spawnY, 'pixel')
       .setDisplaySize(30, 60)
       .setTint(0x00a2ff) // Bright blue cowboy
       .setCollideWorldBounds(true)
       .setDepth(5);
 
-  this.opponent = this.physics.add.sprite(width - 100, groundLevel - 30, 'pixel')
+    this.opponent = this.physics.add.sprite(botSpawnX, spawnY, 'pixel')
       .setDisplaySize(30, 60)
       .setTint(0xff3300) // Red cowboy
       .setCollideWorldBounds(true)
       .setDepth(5);
 
-  // Name labels for visibility
-  this.add.text(this.player.x, this.player.y - 50, 'PLAYER', { color: '#ffffff' }).setOrigin(0.5).setDepth(8);
-  this.add.text(this.opponent.x, this.opponent.y - 50, 'BOT', { color: '#ffffff' }).setOrigin(0.5).setDepth(8);
+    // Ensure physics bodies match visible size for proper collisions
+    (this.player.body as Phaser.Physics.Arcade.Body).setSize(30, 60, true);
+    (this.opponent.body as Phaser.Physics.Arcade.Body).setSize(30, 60, true);
 
-  // Optional: add accessory visuals here if needed
+    // Name labels for visibility
+    this.playerLabel = this.add.text(this.player.x, this.player.y - 50, 'PLAYER', { 
+      color: '#ffffff', 
+      fontSize: '14px',
+      fontFamily: 'serif',
+      backgroundColor: '#000000',
+      padding: { x: 4, y: 2 }
+    }).setOrigin(0.5).setDepth(8);
+    
+    this.botLabel = this.add.text(this.opponent.x, this.opponent.y - 50, 'BOT', { 
+      color: '#ffffff', 
+      fontSize: '14px',
+      fontFamily: 'serif',
+      backgroundColor: '#000000',
+      padding: { x: 4, y: 2 }
+    }).setOrigin(0.5).setDepth(8);
 
-  // Ensure physics bodies match visible size for proper collisions
-  (this.player.body as Phaser.Physics.Arcade.Body).setSize(30, 60);
-  (this.opponent.body as Phaser.Physics.Arcade.Body).setSize(30, 60);
+    // Strong visual rectangles that follow sprites (debug/visibility)
+    this.playerVis = this.add.rectangle(this.player.x, this.player.y, 30, 60, 0x00a2ff, 0.6)
+      .setDepth(9)
+      .setStrokeStyle(2, 0xffffff);
+    this.botVis = this.add.rectangle(this.opponent.x, this.opponent.y, 30, 60, 0xff3300, 0.6)
+      .setDepth(9)
+      .setStrokeStyle(2, 0xffffff);
 
-    // 5) Physics collisions
-    this.physics.add.collider(this.player, groundPlatform);
-    this.physics.add.collider(this.opponent, groundPlatform);
+    // 5) Physics collisions - CRITICAL: Add colliders for both characters
+    this.physics.add.collider(this.player, this.groundPlatform);
+    this.physics.add.collider(this.opponent, this.groundPlatform);
     this.physics.add.collider(this.player, this.obstacles);
     this.physics.add.collider(this.opponent, this.obstacles);
 
     // 6) Bullet groups
-  this.bullets = this.physics.add.group({ maxSize: 20 });
-  this.aiBullets = this.physics.add.group({ maxSize: 20 });
+    this.bullets = this.physics.add.group({ maxSize: 20 });
+    this.aiBullets = this.physics.add.group({ maxSize: 20 });
 
     // Bullet collisions with obstacles
     this.physics.add.collider(this.bullets, this.obstacles, (bullet) => {
@@ -130,6 +169,7 @@ export default class DuelScene extends Phaser.Scene {
       this.puff.emitParticleAt(bulletObj.x, bulletObj.y);
       bulletObj.destroy();
     }, undefined, this);
+    
     this.physics.add.collider(this.aiBullets, this.obstacles, (bullet) => {
       const bulletObj = bullet as Phaser.Physics.Arcade.Sprite;
       this.puff.emitParticleAt(bulletObj.x, bulletObj.y);
@@ -147,7 +187,7 @@ export default class DuelScene extends Phaser.Scene {
     });
 
     // 7) Game ending bullet hits
-  this.physics.add.overlap(this.bullets, this.opponent, (bullet) => {
+    this.physics.add.overlap(this.bullets, this.opponent, (bullet) => {
       if (this.gameEnded) return;
       bullet.destroy();
       this.gameEnded = true;
@@ -177,7 +217,7 @@ export default class DuelScene extends Phaser.Scene {
       });
     }, undefined, this);
     
-  this.physics.add.overlap(this.aiBullets, this.player, (bullet) => {
+    this.physics.add.overlap(this.aiBullets, this.player, (bullet) => {
       if (this.gameEnded) return;
       bullet.destroy();
       this.gameEnded = true;
@@ -224,8 +264,8 @@ export default class DuelScene extends Phaser.Scene {
       if (!this.gameEnded) this.fireBullet();
     });
 
-    // 10) AI behavior
-    this.time.addEvent({ delay: 800, loop: true, callback: this.aiLogic, callbackScope: this });
+    // 10) AI behavior - FIXED: More frequent updates for better synchronization
+    this.time.addEvent({ delay: 200, loop: true, callback: this.aiLogic, callbackScope: this });
 
     // 11) Game instructions
     this.add.text(width / 2, 30, 'HIGH NOON DUEL', {
@@ -254,6 +294,24 @@ export default class DuelScene extends Phaser.Scene {
       this.handlePlayerInput();
       this.updateStats();
     }
+    
+    // Keep visual rectangles aligned to physics sprites
+    if (this.playerVis && this.player) {
+      this.playerVis.x = this.player.x;
+      this.playerVis.y = this.player.y;
+    }
+    if (this.botVis && this.opponent) {
+      this.botVis.x = this.opponent.x;
+      this.botVis.y = this.opponent.y;
+    }
+    if (this.playerLabel && this.player) {
+      this.playerLabel.x = this.player.x;
+      this.playerLabel.y = this.player.y - 50;
+    }
+    if (this.botLabel && this.opponent) {
+      this.botLabel.x = this.opponent.x;
+      this.botLabel.y = this.opponent.y - 50;
+    }
   }
 
   private handlePlayerInput() {
@@ -277,15 +335,15 @@ export default class DuelScene extends Phaser.Scene {
     if (Phaser.Input.Keyboard.JustDown(this.wasdKeys.W) && body.blocked.down) {
       body.setVelocityY(-400);
       this.player.setScale(0.9, 1.3); // Jump stretch
-      this.time.delayedCall(300, () => this.player.setScale(1, 1));
+      this.time.delayedCall(300, () => {
+        if (this.player) this.player.setScale(1, 1);
+      });
     }
 
     // Shoot with Space
     if (Phaser.Input.Keyboard.JustDown(this.shootKey)) {
       this.fireBullet();
     }
-
-    // Remove reload - players only get 10 bullets total
   }
 
   private fireBullet() {
@@ -312,7 +370,9 @@ export default class DuelScene extends Phaser.Scene {
     
     // Shoot animation
     this.player.setScale(1.3, 0.9);
-    this.time.delayedCall(150, () => this.player.setScale(1, 1));
+    this.time.delayedCall(150, () => {
+      if (this.player) this.player.setScale(1, 1);
+    });
     
     // Camera shake
     this.cameras.main.shake(100, 0.01);
@@ -346,18 +406,20 @@ export default class DuelScene extends Phaser.Scene {
     
     // AI shoot animation
     this.opponent.setScale(1.3, 0.9);
-    this.time.delayedCall(150, () => this.opponent.setScale(1, 1));
+    this.time.delayedCall(150, () => {
+      if (this.opponent) this.opponent.setScale(1, 1);
+    });
     
     this.aiAmmo--;
   }
 
   private aiLogic() {
-    if (this.gameEnded) return;
+    if (this.gameEnded || !this.opponent || !this.player) return;
     
     const body = this.opponent.body as Phaser.Physics.Arcade.Body;
     const distance = this.player.x - this.opponent.x;
     
-    // AI movement strategy - more active
+    // FIXED: AI movement strategy - more responsive and grounded
     if (Math.abs(distance) > 300) {
       // Move closer
       body.setVelocityX(Math.sign(distance) * 150);
@@ -367,21 +429,36 @@ export default class DuelScene extends Phaser.Scene {
       body.setVelocityX(-Math.sign(distance) * 120);
       this.opponent.setFlipX(distance > 0);
     } else {
-      // Strafe movement
-      const strafeDirection = Phaser.Math.Between(0, 100) < 50 ? -1 : 1;
-      body.setVelocityX(strafeDirection * 80);
+      // Stop and aim
+      body.setVelocityX(0);
       this.opponent.setFlipX(distance < 0);
     }
     
-    // Jump over obstacles or for evasion - more active jumping
-    if (Phaser.Math.Between(0, 100) < 35 && body.blocked.down) {
+    // FIXED: Jump logic - only jump when on ground and for good reason
+    const shouldJump = (
+      body.blocked.down && // Must be on ground
+      (
+        Phaser.Math.Between(0, 100) < 20 || // Random evasion
+        (Math.abs(distance) < 200 && Math.abs(this.player.y - this.opponent.y) > 50) // Jump to reach player level
+      )
+    );
+    
+    if (shouldJump) {
       body.setVelocityY(-400);
       this.opponent.setScale(0.9, 1.3); // Jump stretch
-      this.time.delayedCall(300, () => this.opponent.setScale(1, 1));
+      this.time.delayedCall(300, () => {
+        if (this.opponent) this.opponent.setScale(1, 1);
+      });
     }
     
-    // Shooting logic - more strategic
-    if (Math.abs(distance) < 400 && Phaser.Math.Between(0, 100) < 45) {
+    // FIXED: Shooting logic - more strategic and frequent
+    const canShoot = (
+      Math.abs(distance) < 500 && 
+      Math.abs(this.player.y - this.opponent.y) < 100 && // Similar height
+      Phaser.Math.Between(0, 100) < 60 // 60% chance to shoot when in range
+    );
+    
+    if (canShoot) {
       this.aiFire();
     }
   }

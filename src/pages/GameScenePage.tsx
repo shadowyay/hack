@@ -3,6 +3,8 @@ import '../assets/modernButton.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import GameCanvas from '../components/game/GameCanvas';
 import HUD from '../components/game/HUD';
+import TrackingGame from '../components/game2/TrackingGame';
+import ChaseGame from '../components/game2/ChaseGame';
 import Button from '../components/ui/Button';
 import Modal from '../components/ui/Modal';
 import { useGame } from '../hooks/useGame';
@@ -29,7 +31,7 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
 
   // Generate scenario on mount
   useEffect(() => {
-    const scenarios: GameScenario[] = [
+    const duelScenarios: GameScenario[] = [
       {
         id: 'town-square-duel',
         mode: 'duel',
@@ -84,7 +86,75 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
       },
     ];
 
-    const scenario = randomChoice(scenarios.filter(s => s.mode === mode.mode));
+    const trackingScenarios: GameScenario[] = [
+      {
+        id: 'wilderness-hunt',
+        mode: 'tracking',
+        description: 'The wilderness calls to you, hunter. Track dangerous beasts across the frontier using your Eagle Eye ability. Read the signs, follow the tracks, and prove your skills as a legendary tracker.',
+        difficulty: 'Medium',
+        environment: {
+          name: 'Wild Frontier',
+          background: 'wilderness',
+          ambientSound: 'nature-ambient',
+          weather: 'Clear',
+          timeOfDay: 'Morning',
+        },
+        aiOpponent: {
+          name: 'Wild Beasts',
+          skill: 0.6,
+          personality: 'Unpredictable and evasive',
+          reactionTime: 400,
+          accuracy: 0.7,
+          aggressiveness: 0.5,
+        },
+        objectives: [
+          'Use Eagle Eye (E) to track animals',
+          'Hunt down various wild beasts',
+          'Score points by tracking and hunting',
+          'Survive the wilderness encounter',
+        ],
+      },
+    ];
+
+    const chaseScenarios: GameScenario[] = [
+      {
+        id: 'outlaw-pursuit',
+        mode: 'chase',
+        description: 'Coming soon: Chase down notorious outlaws across the dusty frontier.',
+        difficulty: 'Medium',
+        environment: {
+          name: 'Desert Plains',
+          background: 'desert',
+          ambientSound: 'chase-ambient',
+          weather: 'Clear',
+          timeOfDay: 'Dusk',
+        },
+        aiOpponent: {
+          name: 'Wanted Outlaw',
+          skill: 0.8,
+          personality: 'Desperate and cunning',
+          reactionTime: 320,
+          accuracy: 0.8,
+          aggressiveness: 0.7,
+        },
+        objectives: [
+          'Chase down the outlaw',
+          'Use strategy to corner your target',
+          'Bring them to justice',
+        ],
+      },
+    ];
+
+    let scenarios: GameScenario[] = [];
+    if (mode.mode === 'duel') {
+      scenarios = duelScenarios;
+    } else if (mode.mode === 'tracking') {
+      scenarios = trackingScenarios;
+    } else if (mode.mode === 'chase') {
+      scenarios = chaseScenarios;
+    }
+
+    const scenario = scenarios.length > 0 ? randomChoice(scenarios) : null;
     setCurrentScenario(scenario);
   }, [mode.mode]);
 
@@ -266,15 +336,21 @@ const GameScenePage: React.FC<GameScenePageProps> = ({
               transition={{ duration: 0.5 }}
               className="absolute inset-0"
             >
-              <GameCanvas
-                mode={mode.mode}
-              />
+              {mode.mode === 'tracking' ? (
+                <TrackingGame />
+              ) : mode.mode === 'chase' ? (
+                <ChaseGame />
+              ) : (
+                <GameCanvas
+                  mode={mode.mode}
+                />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* HUD Overlay */}
-        {gameState.isPlaying && <HUD />}
+        {/* HUD Overlay - Only show for non-tracking games */}
+        {gameState.isPlaying && mode.mode !== 'tracking' && <HUD />}
 
         {/* Pause Button */}
         {gameState.isPlaying && !gameState.isPaused && (
