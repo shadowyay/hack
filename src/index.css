@@ -365,23 +365,26 @@ html {
 
 /* Western input styles */
 .input-western {
-  padding: 0.5rem 1rem;
-  background: linear-gradient(to right, var(--saloon-100), var(--wild-west-100));
-  border: 2px solid var(--wild-west-400);
-  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(20, 20, 21, 0.9), rgba(27, 27, 30, 0.8));
+  border: 2px solid rgba(232, 149, 80, 0.3);
+  border-radius: 0.75rem;
   font-family: 'Cinzel', serif;
-  color: var(--wild-west-900);
-  transition: all 0.2s ease;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .input-western::placeholder {
-  color: var(--wild-west-600);
+  color: rgba(232, 149, 80, 0.6);
 }
 
 .input-western:focus {
   outline: none;
-  border-color: var(--wild-west-600);
-  box-shadow: 0 0 0 2px rgba(232, 149, 80, 0.3);
+  border-color: var(--wild-west-500);
+  box-shadow: 0 0 0 3px rgba(232, 149, 80, 0.2), 0 4px 20px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, rgba(20, 20, 21, 0.95), rgba(27, 27, 30, 0.9));
 }
 
 /* Tooltip styles */
