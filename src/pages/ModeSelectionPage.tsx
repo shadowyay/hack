@@ -130,12 +130,12 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
           animate="visible"
         >
           {gameModes.map((mode) => (
-            <motion.div key={mode.mode} variants={cardVariants}>
+            <motion.div key={mode.mode} variants={cardVariants} className="h-full">
               <Card
                 title={mode.title}
                 onClick={mode.unlocked ? () => onSelectMode(mode) : undefined}
                 hover={mode.unlocked}
-                className={`relative overflow-hidden ${
+                className={`relative overflow-hidden h-full flex flex-col ${
                   mode.unlocked 
                     ? 'cursor-pointer transform hover:scale-105 transition-transform duration-300' 
                     : 'opacity-60 cursor-not-allowed'
@@ -156,21 +156,21 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
                   </div>
                 )}
 
-                <div className="relative z-20 p-6">
+                <div className="relative z-20 p-6 flex-1 flex flex-col">
                   {/* Icon */}
                   <div className="text-6xl mb-4 text-center">{mode.icon}</div>
                   
                   {/* Description */}
-                  <p className="text-white/80 font-elegant mb-4 leading-relaxed">
+                  <p className="text-white/80 font-elegant mb-4 leading-relaxed flex-1">
                     {mode.description}
                   </p>
 
                   {/* Best Score */}
                   {mode.bestScore && mode.unlocked && (
-          <div className="mt-4 p-3 glass">
+                    <div className="mt-4 p-3 glass">
                       <div className="flex justify-between items-center">
-            <span className="text-white/70 font-elegant text-sm">Best Score:</span>
-            <span className="text-white font-western text-lg">
+                        <span className="text-white/70 font-elegant text-sm">Best Score:</span>
+                        <span className="text-white font-western text-lg">
                           {mode.bestScore.toLocaleString()}
                         </span>
                       </div>
