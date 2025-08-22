@@ -97,31 +97,7 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
       </div>
 
   <div className="relative z-10 container mx-auto px-4 py-8">
-        {/* Scroll to Begin Button for scenario page */}
-        <motion.button
-          type="button"
-          className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center focus:outline-none z-50"
-          animate={{
-            y: [0, -10, 0],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: 'loop',
-          }}
-          onClick={() => {
-            const nextSection = document.querySelector('#scenario-content-scroll-target');
-            if (nextSection) {
-              nextSection.scrollIntoView({ behavior: 'smooth' });
-            }
-          }}
-          aria-label="Scroll to scenario content"
-        >
-          <div className="text-white/60 text-2xl">⬇</div>
-          <p className="text-white/60 font-elegant text-sm mt-2">Scroll to Begin</p>
-        </motion.button>
-  {/* Scroll target for scenario scroll button */}
-  <div id="scenario-content-scroll-target" style={{ height: '1px' }} />
+    {/* ...removed scroll to begin button and scroll target... */}
   {/* Header */}
         <motion.div
           className="text-center mb-12"
