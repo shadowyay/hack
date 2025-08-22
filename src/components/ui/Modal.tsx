@@ -33,7 +33,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, classNa
               {title && <h3 className="text-lg font-western text-white">{title}</h3>}
               {!hideClose && <button onClick={onClose} className="btn-western px-3 py-1">✕</button>}
             </div>
-            <div className={`text-white/90 ${fullScreen ? 'p-6 md:p-8 h-full overflow-hidden' : 'p-6 overflow-hidden'} flex-1`}
+            <div className={`text-white/90 ${fullScreen ? 'p-6 md:p-8 h-full overflow-y-auto' : 'p-6 overflow-y-auto max-h-[70vh]'} flex-1`}
             >
               {children}
             </div>

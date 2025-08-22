@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useGame } from '../../hooks/useGame';
-import { formatTime } from '../../utils';
 
 interface HUDProps {
   onShowStats?: () => void;
@@ -18,7 +17,7 @@ const HUD: React.FC<HUDProps> = ({ onShowStats }) => {
     window.addEventListener('GAME_STATS', handler as EventListener);
     return () => window.removeEventListener('GAME_STATS', handler as EventListener);
   }, [updateGameState]);
-  const { stats, timer } = gameState;
+  const { stats } = gameState;
 
   const hudVariants = {
     hidden: { opacity: 0, y: -20 },
@@ -26,14 +25,14 @@ const HUD: React.FC<HUDProps> = ({ onShowStats }) => {
   };
 
   return (
-    <motion.div
-      className="absolute top-4 left-4 right-4 z-40 pointer-events-none"
-      variants={hudVariants}
-      initial="hidden"
-      animate="visible"
-      transition={{ duration: 0.5 }}
-    >
-      <div className="flex justify-between items-start">
+    <>
+      <motion.div
+        className="absolute top-4 left-4 z-40 pointer-events-none"
+        variants={hudVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ duration: 0.5 }}
+      >
         {/* Left Side - Player Stats */}
         <div className="hud-overlay rounded-lg p-4 pointer-events-auto">
           <div className="space-y-2">
@@ -93,39 +92,54 @@ const HUD: React.FC<HUDProps> = ({ onShowStats }) => {
           </div>
         </div>
 
-        {/* Center - Timer */}
-        <div className="hud-overlay rounded-lg p-4 pointer-events-auto">
-          <div className="text-center">
-            <div className="text-white font-elegant text-sm mb-1">Time</div>
-            <div className="text-wild-west-300 font-western text-xl text-glow">
-              {formatTime(timer.minutes * 60000 + timer.seconds * 1000 + timer.milliseconds)}
+        {/* Additional HUD Elements */}
+        <div className="mt-4 flex justify-center">
+          {/* Crosshair indicator when aiming */}
+          <motion.div
+            className="w-8 h-8 pointer-events-none"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <div className="relative w-full h-full">
+              <div className="absolute top-1/2 left-1/2 w-1 h-1 bg-red-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 shadow-lg" />
+              <div className="absolute top-1/2 left-1/2 w-4 h-[1px] bg-red-500 transform -translate-x-1/2 -translate-y-1/2" />
+              <div className="absolute top-1/2 left-1/2 w-[1px] h-4 bg-red-500 transform -translate-x-1/2 -translate-y-1/2" />
             </div>
-          </div>
+          </motion.div>
         </div>
+      </motion.div>
 
-        {/* Right Side - Performance Stats */}
+      {/* Bottom Right - Performance Stats */}
+      <motion.div
+        className="absolute bottom-4 right-4 z-40 pointer-events-none"
+        variants={hudVariants}
+        initial="hidden"
+        animate="visible"
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
         <div className="hud-overlay rounded-lg p-4 pointer-events-auto">
-          <div className="space-y-2 text-right">
+          <div className="space-y-3 text-right min-w-[160px]">
             {/* Accuracy */}
-            <div className="flex items-center justify-end space-x-3">
+            <div className="flex items-center justify-between space-x-4">
+              <span className="text-white font-elegant text-sm">Accuracy</span>
               <span className="text-wild-west-300 font-western text-lg text-glow">
                 {stats.accuracy.toFixed(1)}%
               </span>
-              <span className="text-white font-elegant text-sm w-20">Accuracy</span>
             </div>
 
             {/* Streak */}
-            <div className="flex items-center justify-end space-x-3">
+            <div className="flex items-center justify-between space-x-4">
+              <span className="text-white font-elegant text-sm">Streak</span>
               <span className="text-wild-west-300 font-western text-lg text-glow">
                 {stats.streak}
               </span>
-              <span className="text-white font-elegant text-sm w-20">Streak</span>
             </div>
 
             {/* Hits Indicator */}
             {stats.streak > 0 && (
               <motion.div
-                className="text-green-400 font-bold text-sm"
+                className="text-green-400 font-bold text-sm text-center"
                 initial={{ scale: 1.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -136,34 +150,19 @@ const HUD: React.FC<HUDProps> = ({ onShowStats }) => {
 
             {/* Stats Button */}
             {onShowStats && (
-              <button
-                onClick={onShowStats}
-                className="bg-wild-west-600/80 hover:bg-wild-west-500/80 text-white px-3 py-1 rounded-lg text-sm font-elegant transition-all duration-200 mt-2"
-              >
-                📊 Stats
-              </button>
+              <div className="flex justify-center">
+                <button
+                  onClick={onShowStats}
+                  className="bg-wild-west-600/80 hover:bg-wild-west-500/80 text-white px-3 py-1 rounded-lg text-sm font-elegant transition-all duration-200"
+                >
+                  📊 Stats
+                </button>
+              </div>
             )}
           </div>
         </div>
-      </div>
-
-      {/* Additional HUD Elements */}
-      <div className="mt-4 flex justify-center">
-        {/* Crosshair indicator when aiming */}
-        <motion.div
-          className="w-8 h-8 pointer-events-none"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <div className="relative w-full h-full">
-            <div className="absolute top-1/2 left-1/2 w-1 h-1 bg-red-500 rounded-full transform -translate-x-1/2 -translate-y-1/2 shadow-lg" />
-            <div className="absolute top-1/2 left-1/2 w-4 h-[1px] bg-red-500 transform -translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute top-1/2 left-1/2 w-[1px] h-4 bg-red-500 transform -translate-x-1/2 -translate-y-1/2" />
-          </div>
-        </motion.div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };
 

@@ -348,27 +348,6 @@ export default class DuelScene extends Phaser.Scene {
 
     // Track game start time for scoring
     this.gameStartTime = this.time.now;
-
-    // 11) Game instructions
-    this.add.text(width / 2, 30, 'HIGH NOON DUEL', {
-      fontSize: '32px',
-      color: '#FFD700',
-      fontFamily: 'serif'
-    }).setOrigin(0.5);
-
-    this.add.text(width / 2, 70, 'Use A/D to move, W to jump, SPACE or CLICK to shoot!', {
-      fontSize: '16px',
-      color: '#FFFFFF',
-      backgroundColor: '#000000',
-      padding: { x: 10, y: 5 }
-    }).setOrigin(0.5);
-
-    this.add.text(width / 2, 100, 'First hit wins! Use obstacles for cover.', {
-      fontSize: '14px',
-      color: '#FFFF00',
-      backgroundColor: '#000000',
-      padding: { x: 8, y: 3 }
-    }).setOrigin(0.5);
   }
 
   update() {

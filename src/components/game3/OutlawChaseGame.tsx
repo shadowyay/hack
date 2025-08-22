@@ -853,7 +853,7 @@ const OutlawChaseGame = () => {
   return (
   <div className="fixed inset-0 bg-gradient-to-b from-orange-800 to-yellow-700">
       {/* UI */}
-      <div className="flex justify-between w-full px-6 py-3 text-white font-bold">
+      <div className="flex justify-between items-start w-full px-6 py-3 text-white font-bold">
         <div className="flex gap-6">
           <div className="bg-black bg-opacity-50 px-4 py-2 rounded border border-yellow-600">
             Health: {player.health}
@@ -868,7 +868,7 @@ const OutlawChaseGame = () => {
             Combo: {gameStats.currentCombo}
           </div>
         </div>
-        <div className="bg-black bg-opacity-50 px-4 py-2 rounded border border-yellow-600">
+        <div className="bg-black bg-opacity-50 px-4 py-2 rounded border border-yellow-600 mr-25">
           Wave: {wave}
         </div>
       </div>

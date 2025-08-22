@@ -202,7 +202,7 @@ const App: React.FC = () => {
         loop
         style={{ display: 'none' }}
       />
-      <div className="App bg-vignette bg-grid h-screen overflow-hidden">
+      <div className="App bg-vignette bg-grid min-h-screen">
         {/* User Info & Volume Control UI */}
         <div style={{ position: 'fixed', left: 16, bottom: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {/* Volume Control */}

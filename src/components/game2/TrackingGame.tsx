@@ -1029,7 +1029,7 @@ const RDR2TrackingGame: React.FC = () => {
       </div>
 
       {/* Controls */}
-      <div className="absolute bottom-5 left-5 text-white text-sm z-10 font-serif leading-relaxed"
+      <div className="absolute top-10 left-5 mt-32 text-white text-sm z-10 font-serif leading-relaxed"
            style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
         <div className="font-bold">Controls:</div>
         <div>WASD - Move</div>
