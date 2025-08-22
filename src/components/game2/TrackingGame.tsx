@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import Leaderboard from '../ui/Leaderboard';
 
 interface Animal {
   id: string;
@@ -864,6 +865,16 @@ const RDR2TrackingGame: React.FC = () => {
             </button>
           </div>
 
+          {/* Leaderboard */}
+          <div className="mt-12 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-br from-black/40 to-gray-900/40 border-2 border-amber-600/50 rounded-lg backdrop-blur-sm p-8">
+              <h3 className="text-2xl font-bold text-amber-300 mb-6 text-center">
+                🏆 Animal Tracking Leaderboard
+              </h3>
+              <Leaderboard gameMode="tracking" />
+            </div>
+          </div>
+
           {/* Session Details */}
           <div className="mt-12 max-w-2xl mx-auto text-center">
             <div className="bg-black/30 rounded-lg p-6 border border-amber-600/30">
@@ -901,7 +912,7 @@ const RDR2TrackingGame: React.FC = () => {
   };
 
   return (
-    <div className="relative bg-amber-900 min-h-screen overflow-hidden cursor-none">
+    <div className="relative bg-amber-900 min-h-screen overflow-hidden">
       {/* HUD */}
       <div className="absolute top-5 left-5 text-white text-lg z-10 font-serif" 
            style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
