@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import './assets/volumeSlider.css';
 import { GameProvider } from './context/GameContext';
 import LandingPage from './pages/LandingPage';
 import ModeSelectionPage from './pages/ModeSelectionPage';
@@ -219,7 +220,7 @@ const App: React.FC = () => {
           )}
           
           {/* Volume Control */}
-          <div style={{ background: 'rgba(0,0,0,0.5)', borderRadius: 12, padding: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="volume-control-hover-group" style={{ background: 'rgba(0,0,0,0.5)', borderRadius: 12, padding: 12, display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
             <button
               className="btn-western"
               style={{ fontSize: 22, padding: '0.3rem 0.7rem' }}
@@ -235,7 +236,7 @@ const App: React.FC = () => {
               step={0.01}
               value={volume}
               onChange={e => setVolume(Number(e.target.value))}
-              style={{ width: 120 }}
+              className="volume-slider-modern volume-slider-hideable"
               aria-label="Music volume"
             />
           </div>

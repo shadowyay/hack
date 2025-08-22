@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
+import { GameContext } from '../../context/GameContext';
 import Leaderboard from '../ui/Leaderboard';
 
 interface Animal {
@@ -73,6 +74,8 @@ interface GameState {
 }
 
 const RDR2TrackingGame: React.FC = () => {
+  const gameContext = useContext(GameContext);
+  const isPaused = gameContext?.gameState?.isPaused;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvasSize, setCanvasSize] = useState({ width: typeof window !== 'undefined' ? window.innerWidth : 1200, height: typeof window !== 'undefined' ? window.innerHeight : 800 });
   const gameLoopRef = useRef<number | null>(null);
@@ -368,8 +371,8 @@ const RDR2TrackingGame: React.FC = () => {
 
   // COMPLETE Game loop - RESTORED!
   const gameLoop = useCallback(() => {
-    // Stop the loop entirely when analysis is shown to avoid re-renders
-    if (gameState.showAnalysis) {
+    // Stop the loop entirely when analysis is shown or game is paused
+    if (gameState.showAnalysis || isPaused) {
       if (gameLoopRef.current) {
         cancelAnimationFrame(gameLoopRef.current);
         gameLoopRef.current = null;
@@ -424,45 +427,54 @@ const RDR2TrackingGame: React.FC = () => {
       // Update animals - RESTORED!
       const newTracks = [...newState.tracks];
       const newParticles = [...newState.particles];
-      
-  newState.animals = newState.animals.map(animal => {
+
+      // Player takes damage if near animal
+      let playerDamaged = false;
+      newState.animals = newState.animals.map(animal => {
         const updatedAnimal = { ...animal };
         updatedAnimal.behaviorTimer++;
-        
+
         // Random movement changes
         if (updatedAnimal.behaviorTimer % 120 === 0) {
           updatedAnimal.vx = (Math.random() - 0.5) * updatedAnimal.speed;
           updatedAnimal.vy = (Math.random() - 0.5) * updatedAnimal.speed;
           updatedAnimal.direction = updatedAnimal.vx > 0 ? 1 : -1;
         }
-        
+
         // Update position
         updatedAnimal.x += updatedAnimal.vx * moveSpeed;
         updatedAnimal.y += updatedAnimal.vy * moveSpeed;
-        
+
         // Boundary check
-  if (updatedAnimal.x < 50 || updatedAnimal.x > (W - 50)) {
+        if (updatedAnimal.x < 50 || updatedAnimal.x > (W - 50)) {
           updatedAnimal.vx *= -1;
           updatedAnimal.direction *= -1;
         }
-  if (updatedAnimal.y < 50 || updatedAnimal.y > (H - 50)) {
+        if (updatedAnimal.y < 50 || updatedAnimal.y > (H - 50)) {
           updatedAnimal.vy *= -1;
         }
-        
-  updatedAnimal.x = Math.max(50, Math.min(W - 50, updatedAnimal.x));
-  updatedAnimal.y = Math.max(50, Math.min(H - 50, updatedAnimal.y));
-        
+
+        updatedAnimal.x = Math.max(50, Math.min(W - 50, updatedAnimal.x));
+        updatedAnimal.y = Math.max(50, Math.min(H - 50, updatedAnimal.y));
+
+        // Player damage logic
+        const distToPlayer = Math.sqrt(
+          (updatedAnimal.x - newState.player.x) ** 2 + (updatedAnimal.y - newState.player.y) ** 2
+        );
+        if (distToPlayer < updatedAnimal.size / 2 + newState.player.width / 2 + 10) {
+          playerDamaged = true;
+        }
+
         // Create tracks
         if (newState.time % 60 === 0) {
           newTracks.push(createTrack(updatedAnimal.x, updatedAnimal.y, updatedAnimal.name));
         }
-        
+
         // Eagle Eye tracking
         if (newState.eagleEyeActive) {
           const playerDist = Math.sqrt(
             (updatedAnimal.x - newState.player.x) ** 2 + (updatedAnimal.y - newState.player.y) ** 2
           );
-          
           if (playerDist < 200 && !updatedAnimal.tracked) {
             updatedAnimal.tracked = true;
             newState.trackedAnimals++;
@@ -470,9 +482,18 @@ const RDR2TrackingGame: React.FC = () => {
             newParticles.push(...createParticle(updatedAnimal.x, updatedAnimal.y, 'rgb(0, 255, 255)', 3));
           }
         }
-        
+
         return updatedAnimal;
       });
+
+      // Apply player damage if near any animal
+      if (playerDamaged) {
+        newState.player.health = Math.max(0, newState.player.health - 1); // Lose 1 health per frame near animal
+        // End game if health reaches 0
+        if (newState.player.health === 0) {
+          newState.showAnalysis = true;
+        }
+      }
       
       // Update tracks - RESTORED!
       newState.tracks = newTracks.map(track => ({ ...track, age: track.age + 1 }))

@@ -1,0 +1,81 @@
+.volume-control-hover-group {
+  position: relative;
+}
+.volume-slider-hideable {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.8) translateX(-20px);
+  transition: opacity 0.3s, transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.volume-control-hover-group:hover .volume-slider-hideable,
+.volume-slider-hideable:focus {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateX(0);
+}
+/* Modern volume slider styles */
+.volume-slider-modern {
+  -webkit-appearance: none;
+  width: 120px;
+  height: 6px;
+  background: linear-gradient(90deg, #fbbf24 0%, #f59e42 100%);
+  border-radius: 6px;
+  outline: none;
+  transition: background 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+}
+.volume-slider-modern::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fffbe6;
+  border: 2px solid #fbbf24;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+.volume-slider-modern:active::-webkit-slider-thumb {
+  background: #ffe082;
+  border: 2px solid #f59e42;
+}
+.volume-slider-modern::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fffbe6;
+  border: 2px solid #fbbf24;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+.volume-slider-modern:active::-moz-range-thumb {
+  background: #ffe082;
+  border: 2px solid #f59e42;
+}
+.volume-slider-modern::-ms-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fffbe6;
+  border: 2px solid #fbbf24;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: background 0.2s, border 0.2s;
+}
+.volume-slider-modern:active::-ms-thumb {
+  background: #ffe082;
+  border: 2px solid #f59e42;
+}
+.volume-slider-modern::-ms-fill-lower {
+  background: #fbbf24;
+  border-radius: 6px;
+}
+.volume-slider-modern::-ms-fill-upper {
+  background: #f59e42;
+  border-radius: 6px;
+}
+.volume-slider-modern:focus {
+  outline: none;
+}
