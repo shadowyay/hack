@@ -30,6 +30,7 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
       icon: '🏃‍♂️',
       color: 'from-orange-600 to-orange-800',
       unlocked: true,
+      bestScore: 990,
     },
     {
       mode: 'tracking',
