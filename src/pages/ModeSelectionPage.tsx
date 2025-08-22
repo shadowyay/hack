@@ -69,7 +69,7 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
 
   return (
     <div
-      className="min-h-screen relative overflow-y-auto"
+      className="h-screen overflow-y-auto relative"
       style={{
         backgroundImage: `url('https://theindianwire.com/wp-content/uploads/2019/12/red-dead-2-phone-wallpaper-1-scaled.jpg')`,
         backgroundSize: 'cover',
@@ -105,26 +105,26 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
         ))}
       </div>
 
-  <div className="relative z-10 container mx-auto px-4 py-8">
+  <div className="relative z-10 container mx-auto px-4 py-6 min-h-full">
     {/* ...removed scroll to begin button and scroll target... */}
   {/* Header */}
         <motion.div
-          className="text-center mb-12"
+          className="text-center mb-8"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="text-5xl md:text-6xl font-western text-white drop-shadow mb-4">
+          <h1 className="text-4xl md:text-5xl font-western text-white drop-shadow mb-4">
             CHOOSE YOUR TRAINING
           </h1>
-          <p className="text-xl text-white/70 font-elegant max-w-2xl mx-auto">
+          <p className="text-lg text-white/70 font-elegant max-w-2xl mx-auto">
             Select a training discipline to master the skills of a legendary bounty hunter
           </p>
         </motion.div>
 
         {/* Mode Cards */}
         <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-12"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto mb-8"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
@@ -207,7 +207,7 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
 
         {/* Back Button */}
         <motion.div
-          className="text-center"
+          className="text-center mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
@@ -224,31 +224,31 @@ const ModeSelectionPage: React.FC<ModeSelectionPageProps> = ({
 
         {/* Tips */}
         <motion.div
-          className="mt-16 max-w-4xl mx-auto"
+          className="mt-6 max-w-4xl mx-auto pb-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1 }}
         >
-          <div className="glass p-6">
-            <h3 className="text-xl font-western text-white mb-4 text-center">
+          <div className="glass p-4">
+            <h3 className="text-lg font-western text-white mb-3 text-center">
               🎯 Training Tips
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-center">
               <div>
-                <h4 className="font-elegant text-white/80 mb-2">⚡ Speed</h4>
-                <p className="text-white/70 text-sm font-elegant">
+                <h4 className="font-elegant text-white/80 mb-1 text-sm">⚡ Speed</h4>
+                <p className="text-white/70 text-xs font-elegant">
                   Quick reflexes win duels. Practice your draw speed daily.
                 </p>
               </div>
               <div>
-                <h4 className="font-elegant text-white/80 mb-2">🎯 Accuracy</h4>
-                <p className="text-white/70 text-sm font-elegant">
+                <h4 className="font-elegant text-white/80 mb-1 text-sm">🎯 Accuracy</h4>
+                <p className="text-white/70 text-xs font-elegant">
                   One shot, one kill. Make every bullet count.
                 </p>
               </div>
               <div>
-                <h4 className="font-elegant text-white/80 mb-2">🧠 Strategy</h4>
-                <p className="text-white/70 text-sm font-elegant">
+                <h4 className="font-elegant text-white/80 mb-1 text-sm">🧠 Strategy</h4>
+                <p className="text-white/70 text-xs font-elegant">
                   Think ahead. Anticipate your opponent's moves.
                 </p>
               </div>

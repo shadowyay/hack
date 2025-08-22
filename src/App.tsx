@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import './assets/volumeSlider.css';
 import { GameProvider } from './context/GameContext';
 import LandingPage from './pages/LandingPage';
 import ModeSelectionPage from './pages/ModeSelectionPage';
@@ -203,27 +202,46 @@ const App: React.FC = () => {
         loop
         style={{ display: 'none' }}
       />
-      <div className="App bg-vignette bg-grid min-h-screen overflow-y-auto">
+      <div className="App bg-vignette bg-grid h-screen overflow-hidden">
         {/* User Info & Volume Control UI */}
         <div style={{ position: 'fixed', left: 16, bottom: 16, zIndex: 1000, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {/* User Info */}
-          {user && (
-            <div style={{ background: 'rgba(0,0,0,0.7)', borderRadius: 12, padding: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span className="text-wild-west-300 font-elegant text-sm">Welcome, {user.username}!</span>
-              <button
-                onClick={handleLogout}
-                className="text-red-400 hover:text-red-300 text-xs underline"
-              >
-                Logout
-              </button>
-            </div>
-          )}
-          
           {/* Volume Control */}
-          <div className="volume-control-hover-group" style={{ background: 'rgba(0,0,0,0.5)', borderRadius: 12, padding: 12, display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
+          <div 
+            style={{ 
+              background: 'rgba(0,0,0,0.2)', 
+              borderRadius: 12, 
+              padding: 8, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 8,
+              transition: 'all 0.3s ease',
+              width: 'auto',
+              minWidth: '50px',
+              overflow: 'hidden',
+              backdropFilter: 'blur(4px)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(0,0,0,0.4)';
+              e.currentTarget.style.minWidth = '200px';
+              const slider = e.currentTarget.querySelector('input[type="range"]') as HTMLInputElement;
+              if (slider) {
+                slider.style.opacity = '1';
+                slider.style.width = '120px';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(0,0,0,0.2)';
+              e.currentTarget.style.minWidth = '50px';
+              const slider = e.currentTarget.querySelector('input[type="range"]') as HTMLInputElement;
+              if (slider) {
+                slider.style.opacity = '0';
+                slider.style.width = '0px';
+              }
+            }}
+          >
             <button
               className="btn-western"
-              style={{ fontSize: 22, padding: '0.3rem 0.7rem' }}
+              style={{ fontSize: 22, padding: '0.3rem 0.7rem', flexShrink: 0 }}
               onClick={() => setIsPlaying((p) => !p)}
               aria-label={isPlaying ? 'Pause music' : 'Play music'}
             >
@@ -236,10 +254,27 @@ const App: React.FC = () => {
               step={0.01}
               value={volume}
               onChange={e => setVolume(Number(e.target.value))}
-              className="volume-slider-modern volume-slider-hideable"
+              style={{ 
+                width: '0px', 
+                opacity: 0,
+                transition: 'all 0.3s ease'
+              }}
               aria-label="Music volume"
             />
           </div>
+          
+          {/* User Info */}
+          {user && (
+            <div style={{ background: 'rgba(0,0,0,0.7)', borderRadius: 12, padding: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span className="text-wild-west-300 font-elegant text-sm">Welcome, {user.username}!</span>
+              <button
+                onClick={handleLogout}
+                className="text-red-400 hover:text-red-300 text-xs underline"
+              >
+                Logout
+              </button>
+            </div>
+          )}
         </div>
 
         {currentState === 'landing' && (
